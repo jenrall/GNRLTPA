@@ -2,8 +2,10 @@ package com.gnrl.tpa;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -59,21 +61,55 @@ public class TpaCommand implements CommandExecutor {
         manager.sendRequest(player, target);
         manager.setCooldown(player);
 
-        String sentMsg = plugin.getConfig().getString("messages.request-sent", "")
-                .replace("<player>", target.getName());
-        player.sendRichMessage(sentMsg);
+        // صدا برای فرستنده
+        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.5f);
 
-        String recvMsg = plugin.getConfig().getString("messages.request-received", "")
-                .replace("<player>", player.getName());
-        target.sendRichMessage(recvMsg);
+        // قاب تزئینی برای فرستنده
+        player.sendMessage(Component.text(""));
+        player.sendMessage(Component.text("  ╭──────────────────────────╮", NamedTextColor.GOLD));
+        player.sendMessage(Component.text("  │  ", NamedTextColor.GOLD)
+                .append(Component.text("✦ TPA Request Sent ✦", NamedTextColor.AQUA))
+                .append(Component.text("  │", NamedTextColor.GOLD)));
+        player.sendMessage(Component.text("  │  ", NamedTextColor.GOLD)
+                .append(Component.text("to: ", NamedTextColor.GRAY))
+                .append(Component.text(target.getName(), NamedTextColor.YELLOW))
+                .append(Component.text("              │", NamedTextColor.GOLD)));
+        player.sendMessage(Component.text("  ╰──────────────────────────╯", NamedTextColor.GOLD));
+        player.sendMessage(Component.text(""));
 
-        Component accept = Component.text("[Accept]", NamedTextColor.GREEN)
-                .clickEvent(ClickEvent.runCommand("/tpaccept"));
-        Component deny = Component.text("[Deny]", NamedTextColor.RED)
-                .clickEvent(ClickEvent.runCommand("/tpdeny"));
-        Component buttons = accept.append(Component.text("  ")).append(deny);
+        // صدا برای گیرنده
+        target.playSound(target.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.2f);
 
-        target.sendMessage(buttons);
+        // قاب تزئینی برای گیرنده
+        target.sendMessage(Component.text(""));
+        target.sendMessage(Component.text("  ╭──────────────────────────╮", NamedTextColor.GOLD));
+        target.sendMessage(Component.text("  │  ", NamedTextColor.GOLD)
+                .append(Component.text("✦ New TPA Request ✦", NamedTextColor.AQUA))
+                .append(Component.text("  │", NamedTextColor.GOLD)));
+        target.sendMessage(Component.text("  │  ", NamedTextColor.GOLD)
+                .append(Component.text("from: ", NamedTextColor.GRAY))
+                .append(Component.text(player.getName(), NamedTextColor.YELLOW))
+                .append(Component.text("            │", NamedTextColor.GOLD)));
+        target.sendMessage(Component.text("  ╰──────────────────────────╯", NamedTextColor.GOLD));
+
+        // دکمه‌های شیک Accept/Deny با hover
+        Component accept = Component.text("  ►  ", NamedTextColor.DARK_GRAY)
+                .append(Component.text("ACCEPT", NamedTextColor.GREEN))
+                .append(Component.text("  ◄  ", NamedTextColor.DARK_GRAY))
+                .clickEvent(ClickEvent.runCommand("/tpaccept"))
+                .hoverEvent(HoverEvent.showText(
+                        Component.text("Click to accept", NamedTextColor.GREEN)));
+
+        Component deny = Component.text("  ►  ", NamedTextColor.DARK_GRAY)
+                .append(Component.text("DENY", NamedTextColor.RED))
+                .append(Component.text("  ◄  ", NamedTextColor.DARK_GRAY))
+                .clickEvent(ClickEvent.runCommand("/tpdeny"))
+                .hoverEvent(HoverEvent.showText(
+                        Component.text("Click to deny", NamedTextColor.RED)));
+
+        target.sendMessage(Component.text(""));
+        target.sendMessage(accept.append(Component.text("     ")).append(deny));
+        target.sendMessage(Component.text(""));
 
         return true;
     }
