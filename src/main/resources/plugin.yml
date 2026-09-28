@@ -2,8 +2,10 @@ name: GNRLTPA
 version: 1.0.0
 main: com.gnrl.tpa.GNRLTPA
 api-version: '1.21'
-description: Simple TPA with GUI menu
+description: Modern TPA plugin by GNRL
 author: GNRL
+authors: [GNRL]
+website: https://github.com/jenrall/GNRLTPA
 
 commands:
   tpa:
