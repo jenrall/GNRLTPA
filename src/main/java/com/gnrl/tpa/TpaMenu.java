@@ -25,7 +25,7 @@ public class TpaMenu implements CommandExecutor, Listener {
 
     private final GNRLTPA plugin;
     private final TpaManager manager;
-    private static final Component MENU_TITLE = Component.text("✦ GNRL TPA ✦", NamedTextColor.GOLD);
+    private static final Component MENU_TITLE = Component.text("✦ GNRLFlawless TPA ✦", NamedTextColor.GOLD);
 
     public TpaMenu(GNRLTPA plugin, TpaManager manager) {
         this.plugin = plugin;
@@ -70,15 +70,15 @@ public class TpaMenu implements CommandExecutor, Listener {
             }
         }
 
-        // دکمه‌های تزئینی بالای منو
+        // دکمه تزئینی وسط
         ItemStack logo = new ItemStack(Material.NETHER_STAR);
         ItemMeta logoMeta = logo.getItemMeta();
-        logoMeta.displayName(Component.text("✦ GNRLTPA ✦", NamedTextColor.GOLD));
+        logoMeta.displayName(Component.text("✦ GNRLFlawless ✦", NamedTextColor.GOLD));
 
         List<Component> logoLore = new ArrayList<>();
         logoLore.add(Component.text(""));
         logoLore.add(Component.text("Plugin by ", NamedTextColor.GRAY)
-                .append(Component.text("GNRL", NamedTextColor.YELLOW)));
+                .append(Component.text("GNRLFlawless", NamedTextColor.YELLOW)));
         logoLore.add(Component.text("github.com/jenrall/GNRLTPA", NamedTextColor.DARK_GRAY));
         logoLore.add(Component.text("v1.0.0", NamedTextColor.DARK_GRAY));
         logoMeta.lore(logoLore);
