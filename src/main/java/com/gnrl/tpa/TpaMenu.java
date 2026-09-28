@@ -52,35 +52,38 @@ public class TpaMenu implements CommandExecutor {
             return;
         }
 
-        // 为每个在线玩家创建一个按钮，点击即发送 TPA 请求
+        // ساخت دکمه برای هر بازیکن آنلاین
         List<ActionButton> buttons = new ArrayList<>();
         for (Player target : onlinePlayers) {
-            String label = plugin.getConfig().getString("dialog.player-button-label", "<yellow>Send TPA")
+            String label = plugin.getConfig()
+                    .getString("dialog.player-button-label", "<yellow>Send TPA to <player>")
                     .replace("<player>", target.getName());
 
             ActionButton button = ActionButton.builder(Component.text(label))
                     .action(DialogAction.customClick(
-                            Key.key("gnrltpa:send_tpa"),
+                            Key.key("gnrltpa:send_tpa_" + target.getName()),
                             null
                     ))
                     .build();
             buttons.add(button);
         }
 
-        // 关闭按钮
+        // دکمه بستن
         ActionButton closeButton = ActionButton.builder(
                 Component.text(plugin.getConfig().getString("dialog.close-button-label", "<gray>Close"))
         ).action(DialogAction.customClick(Key.key("gnrltpa:close"), null))
                 .build();
 
-        // 构建 Dialog
+        // ساخت Dialog
         Dialog dialog = Dialog.create(builder -> builder
                 .base(DialogBase.builder(
                         Component.text(plugin.getConfig().getString("dialog.title", "TPA Menu"))
                 )
                         .canCloseWithEscape(true)
                         .body(List.of(
-                                DialogBody.plainMessage(Component.text("Select a player to send a TPA request."))
+                                DialogBody.plainMessage(
+                                        Component.text("Select a player to send a TPA request.")
+                                )
                         ))
                         .build())
                 .type(DialogType.multiAction(buttons, closeButton, 2))
