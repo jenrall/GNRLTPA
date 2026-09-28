@@ -2,6 +2,7 @@ package com.gnrl.tpa;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -62,14 +63,19 @@ public class TpaCommand implements CommandExecutor {
                 .replace("<player>", target.getName());
         player.sendRichMessage(sentMsg);
 
-        Component accept = Component.text("[Accept]")
-                .clickEvent(ClickEvent.runCommand("/tpaccept"));
-        Component deny = Component.text("[Deny]")
-                .clickEvent(ClickEvent.runCommand("/tpdeny"));
+        // پیام به بازیکن مقصد با دکمه‌های Accept/Deny
+        String recvMsg = plugin.getConfig().getString("messages.request-received", "")
+                .replace("<player>", player.getName());
+        target.sendRichMessage(recvMsg);
 
-        target.sendRichMessage(plugin.getConfig().getString("messages.request-received", "")
-                .replace("<player>", player.getName()));
-        target.sendMessage(accept.append(Component.text(" ")).append(deny));
+        // دکمه‌ها
+        Component accept = Component.text("[Accept]", NamedTextColor.GREEN)
+                .clickEvent(ClickEvent.runCommand("/tpaccept"));
+        Component deny = Component.text("[Deny]", NamedTextColor.RED)
+                .clickEvent(ClickEvent.runCommand("/tpdeny"));
+        Component buttons = accept.append(Component.text("  ")).append(deny);
+
+        target.sendMessage(buttons);
 
         return true;
     }
