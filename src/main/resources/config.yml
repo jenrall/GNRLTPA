@@ -1,4 +1,3 @@
-# تنظیمات GNRLTPA
 settings:
   request-timeout-seconds: 60
   cooldown-seconds: 10
@@ -7,20 +6,20 @@ settings:
 
 messages:
   prefix: "<gold>[GNRLTPA]</gold> <reset>"
-  no-permission: "<red>شما دسترسی ندارید.</red>"
-  player-not-found: "<red>بازیکن پیدا نشد.</red>"
-  self-request: "<red>نمی‌تونی به خودت درخواست بفرستی.</red>"
-  request-sent: "<green>درخواست به <yellow><player></yellow> ارسال شد.</green>"
-  request-received: "<yellow><player></yellow> <green>می‌خواد به سمت تو تلپورت کنه.</green>"
-  request-accepted: "<green><player> درخواستت رو قبول کرد.</green>"
-  request-denied: "<red><player> درخواستت رو رد کرد.</red>"
-  no-pending-request: "<red>درخواست در انتظاری نداری.</red>"
-  teleporting: "<green>تلپورت در <yellow><seconds></yellow> ثانیه...</green>"
-  teleport-cancelled: "<red>چون حرکت کردی، تلپورت لغو شد.</red>"
-  teleported: "<green>با موفقیت تلپورت شدی.</green>"
+  no-permission: "<red>You don't have permission.</red>"
+  player-not-found: "<red>Player not found.</red>"
+  self-request: "<red>You can't send a request to yourself.</red>"
+  request-sent: "<green>Request sent to <yellow><player></yellow>.</green>"
+  request-received: "<yellow><player></yellow> <green>wants to teleport to you.</green>"
+  request-accepted: "<green><player> accepted your request.</green>"
+  request-denied: "<red><player> denied your request.</red>"
+  no-pending-request: "<red>You have no pending request.</red>"
+  teleporting: "<green>Teleporting in <yellow><seconds></yellow> seconds...</green>"
+  teleport-cancelled: "<red>Teleport cancelled because you moved.</red>"
+  teleported: "<green>Teleported successfully.</green>"
 
 gui:
-  menu-title: "<dark_gray>منوی TPA"
+  menu-title: "<dark_gray>TPA Menu"
   menu-rows: 3
   previous-page-item: ARROW
   next-page-item: ARROW
