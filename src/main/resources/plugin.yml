@@ -11,6 +11,9 @@ commands:
   tpa:
     description: Send a teleport request
     usage: /tpa <player>
+  tpahere:
+    description: Request someone to teleport to you
+    usage: /tpahere <player>
   tpaccept:
     description: Accept a teleport request
     usage: /tpaccept
