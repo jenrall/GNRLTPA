@@ -74,7 +74,7 @@ public class TpaMenu implements CommandExecutor {
         ).action(DialogAction.customClick(Key.key("gnrltpa:close"), null))
                 .build();
 
-        Dialog dialog = Dialog.create(builder -> builder
+        Dialog dialog = Dialog.create(builder -> builder.empty()
                 .base(DialogBase.builder(
                         Component.text(plugin.getConfig().getString("dialog.title", "TPA Menu"))
                 )
