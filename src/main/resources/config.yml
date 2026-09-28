@@ -1,0 +1,27 @@
+# تنظیمات GNRLTPA
+settings:
+  request-timeout-seconds: 60
+  cooldown-seconds: 10
+  teleport-delay-seconds: 3
+  cancel-on-move: true
+
+messages:
+  prefix: "<gold>[GNRLTPA]</gold> <reset>"
+  no-permission: "<red>شما دسترسی ندارید.</red>"
+  player-not-found: "<red>بازیکن پیدا نشد.</red>"
+  self-request: "<red>نمی‌تونی به خودت درخواست بفرستی.</red>"
+  request-sent: "<green>درخواست به <yellow><player></yellow> ارسال شد.</green>"
+  request-received: "<yellow><player></yellow> <green>می‌خواد به سمت تو تلپورت کنه.</green>"
+  request-accepted: "<green><player> درخواستت رو قبول کرد.</green>"
+  request-denied: "<red><player> درخواستت رو رد کرد.</red>"
+  no-pending-request: "<red>درخواست در انتظاری نداری.</red>"
+  teleporting: "<green>تلپورت در <yellow><seconds></yellow> ثانیه...</green>"
+  teleport-cancelled: "<red>چون حرکت کردی، تلپورت لغو شد.</red>"
+  teleported: "<green>با موفقیت تلپورت شدی.</green>"
+
+gui:
+  menu-title: "<dark_gray>منوی TPA"
+  menu-rows: 3
+  previous-page-item: ARROW
+  next-page-item: ARROW
+  player-head-item: PLAYER_HEAD
