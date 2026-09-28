@@ -31,11 +31,11 @@ public class TpaManager {
         cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
     }
 
-    public void sendRequest(Player sender, Player target) {
+    public void sendRequest(Player sender, Player target, boolean here) {
         UUID targetId = target.getUniqueId();
         UUID senderId = sender.getUniqueId();
 
-        pendingRequests.put(targetId, new TpaRequest(senderId, targetId, System.currentTimeMillis()));
+        pendingRequests.put(targetId, new TpaRequest(senderId, targetId, here, System.currentTimeMillis()));
 
         int timeout = plugin.getConfig().getInt("settings.request-timeout-seconds", 60);
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -50,6 +50,10 @@ public class TpaManager {
         return pendingRequests.containsKey(target.getUniqueId());
     }
 
+    public TpaRequest getRequest(Player target) {
+        return pendingRequests.get(target.getUniqueId());
+    }
+
     public void acceptRequest(Player target) {
         TpaRequest request = pendingRequests.remove(target.getUniqueId());
         if (request == null) return;
@@ -57,7 +61,7 @@ public class TpaManager {
         Player sender = Bukkit.getPlayer(request.senderId());
         if (sender == null || !sender.isOnline()) return;
 
-        // صدای قبول برای هر دو
+        // صدا برای هر دو
         sender.playSound(sender.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.5f);
         target.playSound(target.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.5f);
 
@@ -66,7 +70,7 @@ public class TpaManager {
                 .replace("<seconds>", String.valueOf(delay));
 
         if (delay <= 0) {
-            doTeleport(sender, target);
+            doTeleport(sender, target, request.here());
             return;
         }
 
@@ -76,29 +80,31 @@ public class TpaManager {
         BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
             pendingTeleports.remove(sender.getUniqueId());
             if (sender.isOnline() && target.isOnline()) {
-                doTeleport(sender, target);
+                doTeleport(sender, target, request.here());
             }
         }, delay * 20L);
 
         pendingTeleports.put(sender.getUniqueId(), task);
     }
 
-    private void doTeleport(Player sender, Player target) {
-        // ذرات قبل از تلپورت
-        sender.getWorld().spawnParticle(Particle.PORTAL, sender.getLocation(), 50, 0.5, 1, 0.5, 0.1);
-        target.getWorld().spawnParticle(Particle.PORTAL, target.getLocation(), 50, 0.5, 1, 0.5, 0.1);
+    private void doTeleport(Player sender, Player target, boolean here) {
+        // اگه here=true، مقصد میاد پیش فرستنده
+        // اگه here=false، فرستنده می‌ره پیش مقصد
+        Player whoMoves = here ? target : sender;
+        Player whoStays = here ? sender : target;
 
-        // صدای تلپورت
-        sender.playSound(sender.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
-        target.playSound(target.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
+        whoMoves.getWorld().spawnParticle(Particle.PORTAL, whoMoves.getLocation(), 50, 0.5, 1, 0.5, 0.1);
+        whoStays.getWorld().spawnParticle(Particle.PORTAL, whoStays.getLocation(), 50, 0.5, 1, 0.5, 0.1);
 
-        sender.teleport(target.getLocation());
+        whoMoves.playSound(whoMoves.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
+        whoStays.playSound(whoStays.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1f, 1f);
 
-        // ذرات بعد از تلپورت
-        sender.getWorld().spawnParticle(Particle.REVERSE_PORTAL, sender.getLocation(), 50, 0.5, 1, 0.5, 0.1);
+        whoMoves.teleport(whoStays.getLocation());
 
-        sender.sendRichMessage(plugin.getConfig().getString("messages.teleported", ""));
-        target.sendRichMessage(plugin.getConfig().getString("messages.teleported", ""));
+        whoMoves.getWorld().spawnParticle(Particle.REVERSE_PORTAL, whoMoves.getLocation(), 50, 0.5, 1, 0.5, 0.1);
+
+        whoMoves.sendRichMessage(plugin.getConfig().getString("messages.teleported", ""));
+        whoStays.sendRichMessage(plugin.getConfig().getString("messages.teleported", ""));
     }
 
     public void denyRequest(Player target) {
@@ -107,7 +113,6 @@ public class TpaManager {
 
         Player sender = Bukkit.getPlayer(request.senderId());
         if (sender != null && sender.isOnline()) {
-            // صدای رد
             sender.playSound(sender.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.5f);
             target.playSound(target.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.5f);
 
@@ -123,5 +128,5 @@ public class TpaManager {
         pendingRequests.clear();
     }
 
-    public record TpaRequest(UUID senderId, UUID targetId, long timestamp) {}
+    public record TpaRequest(UUID senderId, UUID targetId, boolean here, long timestamp) {}
 }
