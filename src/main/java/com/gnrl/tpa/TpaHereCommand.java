@@ -61,7 +61,6 @@ public class TpaHereCommand implements CommandExecutor {
 
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.5f);
 
-        // پیام قاب‌دار برای فرستنده
         player.sendMessage(Component.text(""));
         player.sendMessage(Component.text("  ╭──────────────────────────╮", NamedTextColor.GOLD));
         player.sendMessage(Component.text("  │  ", NamedTextColor.GOLD)
@@ -74,7 +73,7 @@ public class TpaHereCommand implements CommandExecutor {
         player.sendMessage(Component.text("  ╰──────────────────────────╯", NamedTextColor.GOLD));
         player.sendMessage(Component.text(""));
 
-        TpaCommand.sendRequestToTarget(player, target, true);
+        TpaHelper.sendRequestToTarget(plugin, player, target, true);
 
         return true;
     }
