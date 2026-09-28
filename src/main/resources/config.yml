@@ -5,7 +5,6 @@ settings:
   cancel-on-move: true
 
 messages:
-  prefix: "<gold>[GNRLTPA] <reset>"
   no-permission: "<red>You don't have permission.</red>"
   player-not-found: "<red>Player not found.</red>"
   self-request: "<red>You can't send a request to yourself.</red>"
@@ -20,6 +19,6 @@ messages:
   already-pending: "<red>That player already has a pending request.</red>"
 
 dialog:
-  title: "<dark_gray>TPA Menu"
-  player-button-label: "<yellow>Send TPA"
-  close-button-label: "<gray>Close"
+  title: "TPA Menu"
+  player-button-label: "Send TPA to <player>"
+  close-button-label: "Close"
