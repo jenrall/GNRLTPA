@@ -63,12 +63,10 @@ public class TpaCommand implements CommandExecutor {
                 .replace("<player>", target.getName());
         player.sendRichMessage(sentMsg);
 
-        // پیام به بازیکن مقصد با دکمه‌های Accept/Deny
         String recvMsg = plugin.getConfig().getString("messages.request-received", "")
                 .replace("<player>", player.getName());
         target.sendRichMessage(recvMsg);
 
-        // دکمه‌ها
         Component accept = Component.text("[Accept]", NamedTextColor.GREEN)
                 .clickEvent(ClickEvent.runCommand("/tpaccept"));
         Component deny = Component.text("[Deny]", NamedTextColor.RED)
