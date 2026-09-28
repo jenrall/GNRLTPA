@@ -58,13 +58,13 @@ public class TpaCommand implements CommandExecutor {
             return true;
         }
 
-        manager.sendRequest(player, target);
+        manager.sendRequest(player, target, false);
         manager.setCooldown(player);
 
         // صدا برای فرستنده
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.5f);
 
-        // قاب تزئینی برای فرستنده
+        // پیام قاب‌دار برای فرستنده
         player.sendMessage(Component.text(""));
         player.sendMessage(Component.text("  ╭──────────────────────────╮", NamedTextColor.GOLD));
         player.sendMessage(Component.text("  │  ", NamedTextColor.GOLD)
@@ -77,14 +77,18 @@ public class TpaCommand implements CommandExecutor {
         player.sendMessage(Component.text("  ╰──────────────────────────╯", NamedTextColor.GOLD));
         player.sendMessage(Component.text(""));
 
-        // صدا برای گیرنده
+        sendRequestToTarget(player, target, false);
+
+        return true;
+    }
+
+    static void sendRequestToTarget(Player player, Player target, boolean here) {
         target.playSound(target.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.2f);
 
-        // قاب تزئینی برای گیرنده
         target.sendMessage(Component.text(""));
         target.sendMessage(Component.text("  ╭──────────────────────────╮", NamedTextColor.GOLD));
         target.sendMessage(Component.text("  │  ", NamedTextColor.GOLD)
-                .append(Component.text("✦ New TPA Request ✦", NamedTextColor.AQUA))
+                .append(Component.text(here ? "✦ TPAHere Request ✦" : "✦ New TPA Request ✦", NamedTextColor.AQUA))
                 .append(Component.text("  │", NamedTextColor.GOLD)));
         target.sendMessage(Component.text("  │  ", NamedTextColor.GOLD)
                 .append(Component.text("from: ", NamedTextColor.GRAY))
@@ -92,7 +96,6 @@ public class TpaCommand implements CommandExecutor {
                 .append(Component.text("            │", NamedTextColor.GOLD)));
         target.sendMessage(Component.text("  ╰──────────────────────────╯", NamedTextColor.GOLD));
 
-        // دکمه‌های شیک Accept/Deny با hover
         Component accept = Component.text("  ►  ", NamedTextColor.DARK_GRAY)
                 .append(Component.text("ACCEPT", NamedTextColor.GREEN))
                 .append(Component.text("  ◄  ", NamedTextColor.DARK_GRAY))
@@ -110,7 +113,5 @@ public class TpaCommand implements CommandExecutor {
         target.sendMessage(Component.text(""));
         target.sendMessage(accept.append(Component.text("     ")).append(deny));
         target.sendMessage(Component.text(""));
-
-        return true;
     }
 }
