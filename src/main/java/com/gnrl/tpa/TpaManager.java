@@ -4,7 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.*;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TpaManager {
@@ -31,6 +32,7 @@ public class TpaManager {
     public void sendRequest(Player sender, Player target) {
         UUID targetId = target.getUniqueId();
         UUID senderId = sender.getUniqueId();
+
         pendingRequests.put(targetId, new TpaRequest(senderId, targetId, System.currentTimeMillis()));
 
         int timeout = plugin.getConfig().getInt("settings.request-timeout-seconds", 60);
@@ -88,14 +90,6 @@ public class TpaManager {
             String msg = plugin.getConfig().getString("messages.request-denied", "")
                     .replace("<player>", target.getName());
             sender.sendRichMessage(msg);
-        }
-    }
-
-    public void cancelTeleport(Player player) {
-        BukkitTask task = pendingTeleports.remove(player.getUniqueId());
-        if (task != null) {
-            task.cancel();
-            player.sendRichMessage(plugin.getConfig().getString("messages.teleport-cancelled", ""));
         }
     }
 
