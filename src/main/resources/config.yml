@@ -1,218 +1,59 @@
-# ╔══════════════════════════════════════════════════════════════════╗
-# ║                                                                  ║
-# ║                    ✦ GNRLTPA Configuration ✦                     ║
-# ║                                                                  ║
-# ║                     Plugin by GNRLFlawless                       ║
-# ║                  github.com/jenrall/GNRLTPA                      ║
-# ║                                                                  ║
-# ╚══════════════════════════════════════════════════════════════════╝
+# GNRLTPA Configuration
+# Plugin by GNRLFlawless
+# https://github.com/jenrall/GNRLTPA
 
-# ═══════════════════════════════════════════════════════════════════
-#  ⚙ GENERAL SETTINGS
-# ═══════════════════════════════════════════════════════════════════
+# Time settings (in seconds)
 settings:
-
-  # ⏱ Time (in seconds) before a TPA request expires
-  # Default: 60
+  # How long a TPA request stays valid before expiring
   request-timeout: 60
-
-  # ⏱ Cooldown (in seconds) between sending TPA requests
-  # Set to 0 to disable cooldown
-  # Default: 10
+  # Cooldown between sending TPA requests (0 to disable)
   cooldown: 10
-
-  # ⏱ Delay (in seconds) before teleportation happens
-  # This gives the player time to prepare
-  # Set to 0 for instant teleport
-  # Default: 3
+  # Delay before teleport happens (0 for instant)
   teleport-delay: 3
-
-  # 🚶 Cancel teleport if player moves during the delay
-  # Default: true
+  # Cancel teleport if player moves during delay
   cancel-on-move: true
 
-  # 🛡 Cancel teleport if player takes damage during the delay
-  # Default: true
-  cancel-on-damage: true
-
-  # 📊 Maximum number of pending requests per player
-  # Default: 5
-  max-pending-requests: 5
-
-
-# ═══════════════════════════════════════════════════════════════════
-#  🔊 SOUND SETTINGS
-# ═══════════════════════════════════════════════════════════════════
+# Sound effects
 sounds:
-
-  # Enable/disable all sounds
-  # Default: true
   enabled: true
-
-  # Sound when sending a request
-  # Default: BLOCK_NOTE_BLOCK_PLING
   request-sent: BLOCK_NOTE_BLOCK_PLING
-
-  # Sound when receiving a request
-  # Default: BLOCK_NOTE_BLOCK_PLING
   request-received: BLOCK_NOTE_BLOCK_PLING
-
-  # Sound when accepting a request
-  # Default: ENTITY_EXPERIENCE_ORB_PICKUP
   request-accepted: ENTITY_EXPERIENCE_ORB_PICKUP
-
-  # Sound when denying a request
-  # Default: BLOCK_NOTE_BLOCK_BASS
   request-denied: BLOCK_NOTE_BLOCK_BASS
-
-  # Sound when teleporting
-  # Default: ENTITY_ENDERMAN_TELEPORT
   teleport: ENTITY_ENDERMAN_TELEPORT
-
-  # Sound when opening the menu
-  # Default: BLOCK_CHEST_OPEN
   menu-open: BLOCK_CHEST_OPEN
 
-  # Sound when clicking a button
-  # Default: UI_BUTTON_CLICK
-  button-click: UI_BUTTON_CLICK
-
-
-# ═══════════════════════════════════════════════════════════════════
-#  ✨ PARTICLE SETTINGS
-# ═══════════════════════════════════════════════════════════════════
+# Particle effects
 particles:
-
-  # Enable/disable particles
-  # Default: true
   enabled: true
-
-  # Particle type before teleport
-  # Default: PORTAL
   before-teleport: PORTAL
-
-  # Particle type after teleport
-  # Default: REVERSE_PORTAL
   after-teleport: REVERSE_PORTAL
-
-  # Number of particles to spawn
-  # Default: 50
   count: 50
 
-
-# ═══════════════════════════════════════════════════════════════════
-#  💬 MESSAGES
-#  Use MiniMessage format: https://docs.advntr.dev/minimessage/format.html
-#  Available placeholders:
-#    <player>  - Target/sender player name
-#    <seconds> - Countdown seconds
-# ═══════════════════════════════════════════════════════════════════
+# Messages (supports MiniMessage format)
 messages:
-
-  # Prefix shown before most messages
   prefix: "<gold>[GNRLTPA] <reset>"
-
-  # Error messages
-  no-permission: "<red>✖ You don't have permission to do that.</red>"
-  player-not-found: "<red>✖ Player not found.</red>"
-  self-request: "<red>✖ You can't send a request to yourself.</red>"
-  cooldown: "<red>✖ Please wait <yellow><seconds></yellow> more seconds.</red>"
-  already-pending: "<red>✖ That player already has a pending request.</red>"
-  no-pending-request: "<red>✖ You have no pending request.</red>"
-  max-pending: "<red>✖ You have too many pending requests.</red>"
-
-  # Success messages
-  request-sent: "<green>✔ Request sent to <yellow><player></yellow>.</green>"
+  no-permission: "<red>You don't have permission.</red>"
+  player-not-found: "<red>Player not found.</red>"
+  self-request: "<red>You can't send a request to yourself.</red>"
+  cooldown: "<red>Please wait <yellow><seconds></yellow> more seconds.</red>"
+  already-pending: "<red>That player already has a pending request.</red>"
+  no-pending-request: "<red>You have no pending request.</red>"
+  request-sent: "<green>Request sent to <yellow><player></yellow>.</green>"
   request-received: "<yellow><player></yellow> <green>wants to teleport to you.</green>"
-  request-denied: "<red>✖ <player> denied your request.</red>"
-  request-cancelled: "<yellow>⚠ Request cancelled.</yellow>"
-
-  # Teleport messages
-  teleporting: "<green>⏳ Teleporting in <yellow><seconds></yellow> seconds...</green>"
-  teleported: "<green>✔ Teleported successfully!</green>"
-  teleport-cancelled-move: "<red>✖ Teleport cancelled because you moved.</red>"
-  teleport-cancelled-damage: "<red>✖ Teleport cancelled because you took damage.</red>"
-
-  # TPAHere messages
-  here-request-sent: "<green>✔ Request sent to <yellow><player></yellow> to teleport to you.</green>"
+  request-denied: "<red><player> denied your request.</red>"
+  here-request-sent: "<green>Request sent to <yellow><player></yellow> to teleport to you.</green>"
   here-request-received: "<yellow><player></yellow> <green>wants you to teleport to them.</green>"
+  teleporting: "<green>Teleporting in <yellow><seconds></yellow> seconds...</green>"
+  teleported: "<green>Teleported successfully.</green>"
+  teleport-cancelled-move: "<red>Teleport cancelled because you moved.</red>"
 
-
-# ═══════════════════════════════════════════════════════════════════
-#  🖼 GUI SETTINGS
-# ═══════════════════════════════════════════════════════════════════
+# GUI settings
 gui:
-
-  # Title of the menu
-  # Default: "✦ GNRLFlawless TPA ✦"
-  title: "✦ GNRLFlawless TPA ✦"
-
-  # Number of rows in the menu (1-6)
-  # Default: 6
+  title: "<gold>TPA Menu"
   rows: 6
-
-  # Fill empty slots with glass panes
-  # Default: true
   fill-empty: true
-
-  # Glass pane color
-  # Options: BLACK, GRAY, LIGHT_GRAY, WHITE, RED, ORANGE, YELLOW,
-  #          LIME, GREEN, CYAN, LIGHT_BLUE, BLUE, PURPLE, MAGENTA, PINK, BROWN
-  # Default: GRAY
   glass-color: GRAY
-
-  # Show plugin logo (Nether Star) in the center
-  # Default: true
   show-logo: true
-
-  # Show player health in lore
-  # Default: true
   show-health: true
-
-  # Show player world in lore
-  # Default: true
   show-world: true
-
-  # Show player ping in lore
-  # Default: false
-  show-ping: false
-
-
-# ═══════════════════════════════════════════════════════════════════
-#  🎨 DECORATION
-# ═══════════════════════════════════════════════════════════════════
-decoration:
-
-  # Use decorative frames around messages
-  # Default: true
-  fancy-messages: true
-
-  # Use hover effects on buttons
-  # Default: true
-  hover-effects: true
-
-  # Emoji icons in messages
-  # Default: true
-  use-emoji: true
-
-
-# ═══════════════════════════════════════════════════════════════════
-#  ⚡ PERMISSIONS
-# ═══════════════════════════════════════════════════════════════════
-#  gnrltpa.use       - Use TPA commands (default: true)
-#  gnrltpa.menu      - Open TPA menu (default: true)
-#  gnrltpa.bypass    - Bypass cooldown and delay (default: op)
-#  gnrltpa.admin     - Admin commands (default: op)
-# ═══════════════════════════════════════════════════════════════════
-
-# ═══════════════════════════════════════════════════════════════════
-#  📝 NOTES
-# ═══════════════════════════════════════════════════════════════════
-#  • All messages support MiniMessage formatting
-#  • Colors: <red>, <green>, <gold>, <aqua>, <yellow>, etc.
-#  • Hex colors: <#FF0000> for custom colors
-#  • Click events: <click:run_command:/tpa>Click here</click>
-#  • Hover events: <hover:show_text:Tooltip>Hover me</hover>
-#
-#  For more info: https://docs.advntr.dev/minimessage/format.html
-# ═══════════════════════════════════════════════════════════════════
