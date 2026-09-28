@@ -55,7 +55,7 @@ public class TpaMenu implements CommandExecutor {
         List<ActionButton> buttons = new ArrayList<>();
         for (Player target : onlinePlayers) {
             String label = plugin.getConfig()
-                    .getString("dialog.player-button-label", "<yellow>Send TPA to <player>")
+                    .getString("dialog.player-button-label", "Send TPA to <player>")
                     .replace("<player>", target.getName());
 
             String safeName = target.getName().toLowerCase();
@@ -70,7 +70,7 @@ public class TpaMenu implements CommandExecutor {
         }
 
         ActionButton closeButton = ActionButton.builder(
-                Component.text(plugin.getConfig().getString("dialog.close-button-label", "<gray>Close"))
+                Component.text(plugin.getConfig().getString("dialog.close-button-label", "Close"))
         ).action(DialogAction.customClick(Key.key("gnrltpa:close"), null))
                 .build();
 
