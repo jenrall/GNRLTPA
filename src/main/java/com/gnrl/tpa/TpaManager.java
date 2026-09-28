@@ -61,7 +61,6 @@ public class TpaManager {
         Player sender = Bukkit.getPlayer(request.senderId());
         if (sender == null || !sender.isOnline()) return;
 
-        // صدا برای هر دو
         sender.playSound(sender.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.5f);
         target.playSound(target.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.5f);
 
@@ -88,8 +87,6 @@ public class TpaManager {
     }
 
     private void doTeleport(Player sender, Player target, boolean here) {
-        // اگه here=true، مقصد میاد پیش فرستنده
-        // اگه here=false، فرستنده می‌ره پیش مقصد
         Player whoMoves = here ? target : sender;
         Player whoStays = here ? sender : target;
 
