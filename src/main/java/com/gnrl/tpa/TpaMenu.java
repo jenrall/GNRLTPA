@@ -1,26 +1,23 @@
 package com.gnrl.tpa;
 
+import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.registry.data.dialog.ActionButton;
+import io.papermc.paper.registry.data.dialog.DialogBase;
+import io.papermc.paper.registry.data.dialog.action.DialogAction;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
+import io.papermc.paper.registry.data.dialog.type.DialogType;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TpaMenu implements CommandExecutor, Listener {
+public class TpaMenu implements CommandExecutor {
 
     private final GNRLTPA plugin;
     private final TpaManager manager;
@@ -28,20 +25,19 @@ public class TpaMenu implements CommandExecutor, Listener {
     public TpaMenu(GNRLTPA plugin, TpaManager manager) {
         this.plugin = plugin;
         this.manager = manager;
-        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
                              @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) return true;
-        openMenu(player);
+        openDialog(player);
         return true;
     }
 
-    public void openMenu(Player player) {
+    public void openDialog(Player player) {
         List<Player> onlinePlayers = new ArrayList<>();
-        for (Player p : Bukkit.getOnlinePlayers()) {
+        for (Player p : player.getServer().getOnlinePlayers()) {
             if (!p.equals(player)) {
                 onlinePlayers.add(p);
             }
@@ -52,57 +48,37 @@ public class TpaMenu implements CommandExecutor, Listener {
             return;
         }
 
-        int rows = 3;
-        int size = rows * 9;
-        Inventory inv = Bukkit.createInventory(null, size,
-                Component.text("TPA Menu", NamedTextColor.DARK_GRAY));
-
-        int slot = 10;
+        // 为每个在线玩家创建按钮
+        List<ActionButton> buttons = new ArrayList<>();
         for (Player target : onlinePlayers) {
-            if (slot >= size - 9) break;
+            String label = "Send TPA to " + target.getName();
+            String safeName = target.getName().toLowerCase();
 
-            ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-            SkullMeta meta = (SkullMeta) head.getItemMeta();
-            meta.setOwningPlayer(target);
-            meta.displayName(Component.text(target.getName(), NamedTextColor.YELLOW));
-
-            List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("Click to send TPA request", NamedTextColor.GRAY));
-            meta.lore(lore);
-            head.setItemMeta(meta);
-
-            inv.setItem(slot, head);
-            slot++;
-
-            if (slot % 9 == 8) slot += 2;
+            ActionButton button = ActionButton.builder(Component.text(label))
+                    .action(DialogAction.customClick(
+                            Key.key("gnrltpa:send_tpa_" + safeName),
+                            null
+                    ))
+                    .build();
+            buttons.add(button);
         }
 
-        player.openInventory(inv);
-    }
+        // 关闭按钮
+        ActionButton closeButton = ActionButton.builder(Component.text("Close"))
+                .action(DialogAction.customClick(Key.key("gnrltpa:close"), null))
+                .build();
 
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
+        // 构建 Dialog —— 关键：.empty() 不能少
+        Dialog dialog = Dialog.create(builder -> builder.empty()
+                .base(DialogBase.builder(Component.text("TPA Menu"))
+                        .canCloseWithEscape(true)
+                        .body(List.of(
+                                DialogBody.plainMessage(Component.text("Select a player"))
+                        ))
+                        .build())
+                .type(DialogType.multiAction(buttons, closeButton, 2))
+                .build());
 
-        Component title = event.getView().title();
-        if (!title.equals(Component.text("TPA Menu", NamedTextColor.DARK_GRAY))) return;
-
-        event.setCancelled(true);
-
-        ItemStack clicked = event.getCurrentItem();
-        if (clicked == null || clicked.getType() != Material.PLAYER_HEAD) return;
-
-        if (!(clicked.getItemMeta() instanceof SkullMeta skullMeta)) return;
-        if (skullMeta.getOwningPlayer() == null) return;
-
-        Player target = skullMeta.getOwningPlayer().getPlayer();
-        if (target == null || !target.isOnline()) {
-            player.sendRichMessage("<red>Player is no longer online.</red>");
-            player.closeInventory();
-            return;
-        }
-
-        player.closeInventory();
-        player.performCommand("tpa " + target.getName());
+        player.showDialog(dialog);
     }
 }
