@@ -2,31 +2,25 @@ name: GNRLTPA
 version: 1.0.0
 main: com.gnrl.tpa.GNRLTPA
 api-version: '1.21'
-description: پلاگین TPA مدرن با منوی GUI برای Paper 1.21.11
+description: Modern TPA plugin with Dialog GUI for Paper 1.21.11
 author: GNRL
 
 commands:
   tpa:
-    description: ارسال درخواست تلپورت
+    description: Send a teleport request
     usage: /tpa <player>
-    aliases: [gnrltpa]
   tpaccept:
-    description: قبول درخواست تلپورت
+    description: Accept a teleport request
     usage: /tpaccept
-    aliases: [tpyes]
   tpdeny:
-    description: رد درخواست تلپورت
+    description: Deny a teleport request
     usage: /tpdeny
-    aliases: [tpno]
   tpmenu:
-    description: باز کردن منوی انتخاب بازیکن
+    description: Open the TPA dialog menu
     usage: /tpmenu
-    aliases: [gnrlmenu]
 
 permissions:
   gnrltpa.use:
-    description: اجازه استفاده از دستورات TPA
     default: true
   gnrltpa.menu:
-    description: اجازه باز کردن منوی GUI
     default: true
