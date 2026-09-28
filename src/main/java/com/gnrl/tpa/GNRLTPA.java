@@ -22,11 +22,11 @@ public class GNRLTPA extends JavaPlugin {
 
     private void printLogo() {
         getLogger().info("");
-        getLogger().info("  \u001B[33m╔══════════════════════════════════╗");
-        getLogger().info("  \u001B[33m║  \u001B[36m✦ GNRLTPA v1.0.0 ✦\u001B[33m              ║");
-        getLogger().info("  \u001B[33m║  \u001B[37mAuthor: GNRL\u001B[33m                    ║");
-        getLogger().info("  \u001B[33m║  \u001B[37mgithub.com/jenrall/GNRLTPA\u001B[33m      ║");
-        getLogger().info("  \u001B[33m╚══════════════════════════════════╝");
+        getLogger().info("  \u001B[33m╔══════════════════════════════════════╗");
+        getLogger().info("  \u001B[33m║  \u001B[36m✦ GNRLTPA v1.0.0 ✦\u001B[33m                  ║");
+        getLogger().info("  \u001B[33m║  \u001B[37mAuthor: GNRLFlawless\u001B[33m                 ║");
+        getLogger().info("  \u001B[33m║  \u001B[37mgithub.com/jenrall/GNRLTPA\u001B[33m          ║");
+        getLogger().info("  \u001B[33m╚══════════════════════════════════════╝");
         getLogger().info("  \u001B[32m✔ Plugin loaded successfully!");
         getLogger().info("");
     }
