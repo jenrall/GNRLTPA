@@ -14,6 +14,10 @@ public class GNRLTPA extends JavaPlugin {
         getCommand("tpa").setExecutor(new TpaCommand(this, tpaManager));
         getCommand("tpaccept").setExecutor(new TpaAcceptCommand(this, tpaManager));
         getCommand("tpdeny").setExecutor(new TpaDenyCommand(this, tpaManager));
+        getCommand("tpmenu").setExecutor(new TpaMenu(this, tpaManager));
+
+        getServer().getPluginManager().registerEvents(
+                new TpaDialogListener(this), this);
 
         getLogger().info("GNRLTPA enabled!");
     }
