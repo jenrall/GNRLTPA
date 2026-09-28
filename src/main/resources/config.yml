@@ -1,0 +1,17 @@
+settings:
+  request-timeout-seconds: 60
+  cooldown-seconds: 10
+  teleport-delay-seconds: 3
+
+messages:
+  no-permission: "<red>You don't have permission.</red>"
+  player-not-found: "<red>Player not found.</red>"
+  self-request: "<red>You can't send a request to yourself.</red>"
+  request-sent: "<green>Request sent to <yellow><player></yellow>.</green>"
+  request-received: "<yellow><player></yellow> <green>wants to teleport to you.</green>"
+  request-denied: "<red><player> denied your request.</red>"
+  no-pending-request: "<red>You have no pending request.</red>"
+  teleporting: "<green>Teleporting in <yellow><seconds></yellow> seconds...</green>"
+  teleported: "<green>Teleported successfully.</green>"
+  cooldown: "<red>Please wait before sending another request.</red>"
+  already-pending: "<red>That player already has a pending request.</red>"
