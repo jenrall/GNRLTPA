@@ -52,29 +52,29 @@ public class TpaMenu implements CommandExecutor {
             return;
         }
 
-        // ساخت دکمه برای هر بازیکن آنلاین
         List<ActionButton> buttons = new ArrayList<>();
         for (Player target : onlinePlayers) {
             String label = plugin.getConfig()
                     .getString("dialog.player-button-label", "<yellow>Send TPA to <player>")
                     .replace("<player>", target.getName());
 
+            // اسم بازیکن رو lowercase کن تا Key.key ارور نده
+            String safeName = target.getName().toLowerCase();
+
             ActionButton button = ActionButton.builder(Component.text(label))
                     .action(DialogAction.customClick(
-                            Key.key("gnrltpa:send_tpa_" + target.getName()),
+                            Key.key("gnrltpa:send_tpa_" + safeName),
                             null
                     ))
                     .build();
             buttons.add(button);
         }
 
-        // دکمه بستن
         ActionButton closeButton = ActionButton.builder(
                 Component.text(plugin.getConfig().getString("dialog.close-button-label", "<gray>Close"))
         ).action(DialogAction.customClick(Key.key("gnrltpa:close"), null))
                 .build();
 
-        // ساخت Dialog
         Dialog dialog = Dialog.create(builder -> builder
                 .base(DialogBase.builder(
                         Component.text(plugin.getConfig().getString("dialog.title", "TPA Menu"))
