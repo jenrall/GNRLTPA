@@ -9,7 +9,6 @@ public class GNRLTPA extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-
         tpaManager = new TpaManager(this);
 
         getCommand("tpa").setExecutor(new TpaCommand(this, tpaManager));
@@ -17,7 +16,7 @@ public class GNRLTPA extends JavaPlugin {
         getCommand("tpdeny").setExecutor(new TpaDenyCommand(this, tpaManager));
         getCommand("tpmenu").setExecutor(new TpaMenu(this, tpaManager));
 
-        getLogger().info("GNRLTPA با موفقیت فعال شد!");
+        getLogger().info("GNRLTPA enabled!");
     }
 
     @Override
@@ -25,7 +24,7 @@ public class GNRLTPA extends JavaPlugin {
         if (tpaManager != null) {
             tpaManager.clearAll();
         }
-        getLogger().info("GNRLTPA غیرفعال شد.");
+        getLogger().info("GNRLTPA disabled.");
     }
 
     public TpaManager getTpaManager() {
