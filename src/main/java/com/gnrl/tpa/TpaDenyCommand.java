@@ -22,7 +22,7 @@ public class TpaDenyCommand implements CommandExecutor {
         if (!(sender instanceof Player player)) return true;
 
         if (!manager.hasPendingRequest(player)) {
-            player.sendMessage(plugin.getConfig().getString("messages.no-pending-request"));
+            player.sendRichMessage(plugin.getConfig().getString("messages.no-pending-request", ""));
             return true;
         }
 
