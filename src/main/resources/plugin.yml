@@ -2,7 +2,7 @@ name: GNRLTPA
 version: 1.0.0
 main: com.gnrl.tpa.GNRLTPA
 api-version: '1.21'
-description: Simple TPA with clickable chat buttons
+description: Simple TPA with Dialog GUI
 author: GNRL
 
 commands:
@@ -15,6 +15,9 @@ commands:
   tpdeny:
     description: Deny a teleport request
     usage: /tpdeny
+  tpmenu:
+    description: Open TPA dialog menu
+    usage: /tpmenu
 
 permissions:
   gnrltpa.use:
