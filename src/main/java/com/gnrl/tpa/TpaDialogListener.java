@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerQuitEvent;
 
 public class TpaDialogListener implements Listener {
 
@@ -20,20 +19,26 @@ public class TpaDialogListener implements Listener {
 
     @EventHandler
     public void onCustomClick(PlayerCustomClickEvent event) {
-        Player player = (Player) event.getPlayer();
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+
         Key key = event.getIdentifier();
         String keyString = key.asString();
 
-        // کلیک روی دکمه بستن
         if (keyString.equals("gnrltpa:close")) {
             player.closeDialog();
             return;
         }
 
-        // کلیک روی دکمه ارسال TPA
         if (keyString.startsWith("gnrltpa:send_tpa_")) {
             String targetName = keyString.substring("gnrltpa:send_tpa_".length());
-            Player target = Bukkit.getPlayerExact(targetName);
+
+            Player target = null;
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                if (p.getName().equalsIgnoreCase(targetName)) {
+                    target = p;
+                    break;
+                }
+            }
 
             if (target == null || !target.isOnline()) {
                 player.sendRichMessage(plugin.getConfig().getString("messages.player-not-found", ""));
@@ -41,14 +46,7 @@ public class TpaDialogListener implements Listener {
             }
 
             player.closeDialog();
-
-            // فراخوانی دستور tpa
             player.performCommand("tpa " + target.getName());
         }
-    }
-
-    @EventHandler
-    public void onQuit(PlayerQuitEvent event) {
-        // پاک‌سازی (اگه لازم شد)
     }
 }
