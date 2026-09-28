@@ -1,0 +1,21 @@
+name: GNRLTPA
+version: 1.0.0
+main: com.gnrl.tpa.GNRLTPA
+api-version: '1.21'
+description: Simple TPA with clickable chat buttons
+author: GNRL
+
+commands:
+  tpa:
+    description: Send a teleport request
+    usage: /tpa <player>
+  tpaccept:
+    description: Accept a teleport request
+    usage: /tpaccept
+  tpdeny:
+    description: Deny a teleport request
+    usage: /tpdeny
+
+permissions:
+  gnrltpa.use:
+    default: true
