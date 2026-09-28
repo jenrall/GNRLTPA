@@ -58,7 +58,6 @@ public class TpaMenu implements CommandExecutor {
                     .getString("dialog.player-button-label", "<yellow>Send TPA to <player>")
                     .replace("<player>", target.getName());
 
-            // اسم بازیکن رو lowercase کن تا Key.key ارور نده
             String safeName = target.getName().toLowerCase();
 
             ActionButton button = ActionButton.builder(Component.text(label))
