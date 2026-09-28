@@ -4,7 +4,6 @@ settings:
   teleport-delay-seconds: 3
 
 messages:
-  prefix: "<gold>[GNRLTPA] <reset>"
   no-permission: "<red>You don't have permission.</red>"
   player-not-found: "<red>Player not found.</red>"
   self-request: "<red>You can't send a request to yourself.</red>"
@@ -16,3 +15,5 @@ messages:
   teleported: "<green>Teleported successfully.</green>"
   cooldown: "<red>Please wait before sending another request.</red>"
   already-pending: "<red>That player already has a pending request.</red>"
+  here-request-sent: "<green>Request sent to <yellow><player></yellow> to teleport to you.</green>"
+  here-request-received: "<yellow><player></yellow> <green>wants you to teleport to them.</green>"
