@@ -31,7 +31,6 @@ public class TpaManager {
     public void sendRequest(Player sender, Player target) {
         UUID targetId = target.getUniqueId();
         UUID senderId = sender.getUniqueId();
-
         pendingRequests.put(targetId, new TpaRequest(senderId, targetId, System.currentTimeMillis()));
 
         int timeout = plugin.getConfig().getInt("settings.request-timeout-seconds", 60);
@@ -39,14 +38,8 @@ public class TpaManager {
             TpaRequest req = pendingRequests.get(targetId);
             if (req != null && req.senderId().equals(senderId)) {
                 pendingRequests.remove(targetId);
-                sender.sendMessage(plugin.getConfig().getString("messages.request-denied")
-                        .replace("<player>", target.getName()));
             }
         }, timeout * 20L);
-    }
-
-    public TpaRequest getRequest(Player target) {
-        return pendingRequests.get(target.getUniqueId());
     }
 
     public boolean hasPendingRequest(Player target) {
@@ -61,25 +54,25 @@ public class TpaManager {
         if (sender == null || !sender.isOnline()) return;
 
         int delay = plugin.getConfig().getInt("settings.teleport-delay-seconds", 3);
+        String teleportingMsg = plugin.getConfig().getString("messages.teleporting", "")
+                .replace("<seconds>", String.valueOf(delay));
 
         if (delay <= 0) {
             sender.teleport(target.getLocation());
-            sender.sendMessage(plugin.getConfig().getString("messages.teleported"));
-            target.sendMessage(plugin.getConfig().getString("messages.teleported"));
+            sender.sendRichMessage(plugin.getConfig().getString("messages.teleported", ""));
+            target.sendRichMessage(plugin.getConfig().getString("messages.teleported", ""));
             return;
         }
 
-        sender.sendMessage(plugin.getConfig().getString("messages.teleporting")
-                .replace("<seconds>", String.valueOf(delay)));
-        target.sendMessage(plugin.getConfig().getString("messages.teleporting")
-                .replace("<seconds>", String.valueOf(delay)));
+        sender.sendRichMessage(teleportingMsg);
+        target.sendRichMessage(teleportingMsg);
 
         BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
             pendingTeleports.remove(sender.getUniqueId());
             if (sender.isOnline() && target.isOnline()) {
                 sender.teleport(target.getLocation());
-                sender.sendMessage(plugin.getConfig().getString("messages.teleported"));
-                target.sendMessage(plugin.getConfig().getString("messages.teleported"));
+                sender.sendRichMessage(plugin.getConfig().getString("messages.teleported", ""));
+                target.sendRichMessage(plugin.getConfig().getString("messages.teleported", ""));
             }
         }, delay * 20L);
 
@@ -92,8 +85,9 @@ public class TpaManager {
 
         Player sender = Bukkit.getPlayer(request.senderId());
         if (sender != null && sender.isOnline()) {
-            sender.sendMessage(plugin.getConfig().getString("messages.request-denied")
-                    .replace("<player>", target.getName()));
+            String msg = plugin.getConfig().getString("messages.request-denied", "")
+                    .replace("<player>", target.getName());
+            sender.sendRichMessage(msg);
         }
     }
 
@@ -101,7 +95,7 @@ public class TpaManager {
         BukkitTask task = pendingTeleports.remove(player.getUniqueId());
         if (task != null) {
             task.cancel();
-            player.sendMessage(plugin.getConfig().getString("messages.teleport-cancelled"));
+            player.sendRichMessage(plugin.getConfig().getString("messages.teleport-cancelled", ""));
         }
     }
 
