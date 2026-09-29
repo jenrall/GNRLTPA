@@ -30,9 +30,8 @@ public class TpaCommand implements CommandExecutor {
             return true;
         }
 
-        // اگه آرگومان نداشت، GUI باز کن
         if (args.length == 0) {
-            new TpaMenu(plugin, manager).openMenu(player, false);
+            plugin.getTpaMenu().openMenu(player, false);
             return true;
         }
 
@@ -44,6 +43,18 @@ public class TpaCommand implements CommandExecutor {
 
         if (target.equals(player)) {
             player.sendRichMessage(plugin.getConfig().getString("messages.self-request", ""));
+            return true;
+        }
+
+        // چک Toggle
+        if (plugin.getPlayerSettings().isTpaDisabled(target.getUniqueId())) {
+            player.sendRichMessage(plugin.getConfig().getString("messages.tpa-disabled", ""));
+            return true;
+        }
+
+        // چک Block
+        if (plugin.getPlayerSettings().isBlocked(target.getUniqueId(), player.getUniqueId())) {
+            player.sendRichMessage(plugin.getConfig().getString("messages.you-are-blocked", ""));
             return true;
         }
 
