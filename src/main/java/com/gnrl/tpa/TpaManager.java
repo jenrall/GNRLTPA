@@ -6,7 +6,9 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,10 +18,13 @@ public class TpaManager {
     private final Map<UUID, TpaRequest> pendingRequests = new ConcurrentHashMap<>();
     private final Map<UUID, Long> cooldowns = new ConcurrentHashMap<>();
     private final Map<UUID, BukkitTask> pendingTeleports = new ConcurrentHashMap<>();
+    private final Set<UUID> autoAccept = ConcurrentHashMap.newKeySet();
 
     public TpaManager(GNRLTPA plugin) {
         this.plugin = plugin;
     }
+
+    // ═══════════════ COOLDOWN ═══════════════
 
     public boolean isOnCooldown(Player player) {
         long cooldown = plugin.getConfig().getLong("settings.cooldown-seconds", 10) * 1000L;
@@ -31,17 +36,48 @@ public class TpaManager {
         cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
     }
 
+    // ═══════════════ AUTO ACCEPT ═══════════════
+
+    public boolean isAutoAccept(Player player) {
+        return autoAccept.contains(player.getUniqueId());
+    }
+
+    public boolean toggleAutoAccept(Player player) {
+        UUID id = player.getUniqueId();
+        if (autoAccept.contains(id)) {
+            autoAccept.remove(id);
+            return false;
+        } else {
+            autoAccept.add(id);
+            return true;
+        }
+    }
+
+    // ═══════════════ REQUESTS ═══════════════
+
     public void sendRequest(Player sender, Player target, boolean here) {
         UUID targetId = target.getUniqueId();
         UUID senderId = sender.getUniqueId();
 
         pendingRequests.put(targetId, new TpaRequest(senderId, targetId, here, System.currentTimeMillis()));
 
+        // اگه گیرنده auto-accept داره، فوری قبول کن
+        if (isAutoAccept(target)) {
+            sender.sendRichMessage("<green>" + target.getName() + " has auto-accept enabled. Teleporting...</green>");
+            target.sendRichMessage("<green>Auto-accepted request from " + sender.getName() + "</green>");
+            acceptRequest(target);
+            return;
+        }
+
         int timeout = plugin.getConfig().getInt("settings.request-timeout-seconds", 60);
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             TpaRequest req = pendingRequests.get(targetId);
             if (req != null && req.senderId().equals(senderId)) {
                 pendingRequests.remove(targetId);
+                Player s = Bukkit.getPlayer(senderId);
+                if (s != null && s.isOnline()) {
+                    s.sendRichMessage("<red>Your request to " + target.getName() + " timed out.</red>");
+                }
             }
         }, timeout * 20L);
     }
@@ -53,6 +89,19 @@ public class TpaManager {
     public TpaRequest getRequest(Player target) {
         return pendingRequests.get(target.getUniqueId());
     }
+
+    public boolean cancelSentRequest(Player sender) {
+        UUID senderId = sender.getUniqueId();
+        for (Map.Entry<UUID, TpaRequest> entry : pendingRequests.entrySet()) {
+            if (entry.getValue().senderId().equals(senderId)) {
+                pendingRequests.remove(entry.getKey());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ═══════════════ ACCEPT / DENY ═══════════════
 
     public void acceptRequest(Player target) {
         TpaRequest request = pendingRequests.remove(target.getUniqueId());
