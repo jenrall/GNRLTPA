@@ -10,19 +10,16 @@ website: https://github.com/jenrall/GNRLTPA
 commands:
   tpa:
     description: Send a teleport request
-    usage: /tpa <player>
+    usage: /tpa [player]
   tpahere:
     description: Request someone to teleport to you
-    usage: /tpahere <player>
+    usage: /tpahere [player]
   tpaccept:
     description: Accept a teleport request
     usage: /tpaccept
   tpdeny:
     description: Deny a teleport request
     usage: /tpdeny
-  tpmenu:
-    description: Open TPA menu
-    usage: /tpmenu
 
 permissions:
   gnrltpa.use:
