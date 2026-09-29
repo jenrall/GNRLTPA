@@ -6,9 +6,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,13 +16,11 @@ public class TpaManager {
     private final Map<UUID, TpaRequest> pendingRequests = new ConcurrentHashMap<>();
     private final Map<UUID, Long> cooldowns = new ConcurrentHashMap<>();
     private final Map<UUID, BukkitTask> pendingTeleports = new ConcurrentHashMap<>();
-    private final Set<UUID> autoAccept = ConcurrentHashMap.newKeySet();
+    private final java.util.Set<UUID> autoAccept = ConcurrentHashMap.newKeySet();
 
     public TpaManager(GNRLTPA plugin) {
         this.plugin = plugin;
     }
-
-    // ═══════════════ COOLDOWN ═══════════════
 
     public boolean isOnCooldown(Player player) {
         long cooldown = plugin.getConfig().getLong("settings.cooldown-seconds", 10) * 1000L;
@@ -36,8 +32,6 @@ public class TpaManager {
         cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
     }
 
-    // ═══════════════ AUTO ACCEPT ═══════════════
-
     public boolean isAutoAccept(Player player) {
         return autoAccept.contains(player.getUniqueId());
     }
@@ -47,13 +41,10 @@ public class TpaManager {
         if (autoAccept.contains(id)) {
             autoAccept.remove(id);
             return false;
-        } else {
-            autoAccept.add(id);
-            return true;
         }
+        autoAccept.add(id);
+        return true;
     }
-
-    // ═══════════════ REQUESTS ═══════════════
 
     public void sendRequest(Player sender, Player target, boolean here) {
         UUID targetId = target.getUniqueId();
@@ -61,9 +52,8 @@ public class TpaManager {
 
         pendingRequests.put(targetId, new TpaRequest(senderId, targetId, here, System.currentTimeMillis()));
 
-        // اگه گیرنده auto-accept داره، فوری قبول کن
         if (isAutoAccept(target)) {
-            sender.sendRichMessage("<green>" + target.getName() + " has auto-accept enabled. Teleporting...</green>");
+            sender.sendRichMessage("<green>" + target.getName() + " has auto-accept enabled.</green>");
             target.sendRichMessage("<green>Auto-accepted request from " + sender.getName() + "</green>");
             acceptRequest(target);
             return;
@@ -100,8 +90,6 @@ public class TpaManager {
         }
         return false;
     }
-
-    // ═══════════════ ACCEPT / DENY ═══════════════
 
     public void acceptRequest(Player target) {
         TpaRequest request = pendingRequests.remove(target.getUniqueId());
