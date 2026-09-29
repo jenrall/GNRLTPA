@@ -5,43 +5,29 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TpaMenu implements CommandExecutor, Listener {
+public class TpaMenu {
+
+    public static final Component TPA_TITLE = Component.text("✦ TPA Menu ✦", NamedTextColor.GOLD);
+    public static final Component TPAHERE_TITLE = Component.text("✦ TPAHere Menu ✦", NamedTextColor.AQUA);
 
     private final GNRLTPA plugin;
     private final TpaManager manager;
-    private static final Component MENU_TITLE = Component.text("✦ GNRLFlawless TPA ✦", NamedTextColor.GOLD);
 
     public TpaMenu(GNRLTPA plugin, TpaManager manager) {
         this.plugin = plugin;
         this.manager = manager;
-        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
-                             @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player player)) return true;
-        openMenu(player);
-        return true;
-    }
-
-    public void openMenu(Player player) {
+    public void openMenu(Player player, boolean here) {
         List<Player> onlinePlayers = new ArrayList<>();
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!p.equals(player)) {
@@ -54,11 +40,12 @@ public class TpaMenu implements CommandExecutor, Listener {
             return;
         }
 
+        Component title = here ? TPAHERE_TITLE : TPA_TITLE;
         int rows = 6;
         int size = rows * 9;
-        Inventory inv = Bukkit.createInventory(null, size, MENU_TITLE);
+        Inventory inv = Bukkit.createInventory(null, size, title);
 
-        // قاب شیشه‌ای دور منو
+        // قاب شیشه‌ای
         ItemStack glass = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta glassMeta = glass.getItemMeta();
         glassMeta.displayName(Component.text(" ", NamedTextColor.GRAY));
@@ -70,17 +57,20 @@ public class TpaMenu implements CommandExecutor, Listener {
             }
         }
 
-        // دکمه تزئینی وسط
-        ItemStack logo = new ItemStack(Material.NETHER_STAR);
+        // لوگو وسط
+        ItemStack logo = new ItemStack(here ? Material.ENDER_PEARL : Material.NETHER_STAR);
         ItemMeta logoMeta = logo.getItemMeta();
-        logoMeta.displayName(Component.text("✦ GNRLFlawless ✦", NamedTextColor.GOLD));
+        logoMeta.displayName(Component.text(
+                here ? "✦ TPAHere ✦" : "✦ GNRLFlawless TPA ✦",
+                here ? NamedTextColor.AQUA : NamedTextColor.GOLD));
 
         List<Component> logoLore = new ArrayList<>();
         logoLore.add(Component.text(""));
+        logoLore.add(Component.text(here ? "Request players to come to you" : "Request to teleport to a player",
+                NamedTextColor.GRAY));
+        logoLore.add(Component.text(""));
         logoLore.add(Component.text("Plugin by ", NamedTextColor.GRAY)
                 .append(Component.text("GNRLFlawless", NamedTextColor.YELLOW)));
-        logoLore.add(Component.text("github.com/jenrall/GNRLTPA", NamedTextColor.DARK_GRAY));
-        logoLore.add(Component.text("v1.0.0", NamedTextColor.DARK_GRAY));
         logoMeta.lore(logoLore);
         logo.setItemMeta(logoMeta);
         inv.setItem(4, logo);
@@ -108,7 +98,8 @@ public class TpaMenu implements CommandExecutor, Listener {
             lore.add(Component.text("  📍 World: ", NamedTextColor.GRAY)
                     .append(Component.text(target.getWorld().getName(), NamedTextColor.AQUA)));
             lore.add(Component.text(""));
-            lore.add(Component.text("  ▸ Click to send TPA", NamedTextColor.GREEN));
+            lore.add(Component.text(here ? "  ▸ Click to request here" : "  ▸ Click to send TPA",
+                    NamedTextColor.GREEN));
 
             meta.lore(lore);
             head.setItemMeta(meta);
@@ -119,30 +110,5 @@ public class TpaMenu implements CommandExecutor, Listener {
 
         player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1f, 1.2f);
         player.openInventory(inv);
-    }
-
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!(event.getWhoClicked() instanceof Player player)) return;
-        if (!event.getView().title().equals(MENU_TITLE)) return;
-
-        event.setCancelled(true);
-
-        ItemStack clicked = event.getCurrentItem();
-        if (clicked == null || clicked.getType() != Material.PLAYER_HEAD) return;
-
-        if (!(clicked.getItemMeta() instanceof SkullMeta skullMeta)) return;
-        if (skullMeta.getOwningPlayer() == null) return;
-
-        Player target = skullMeta.getOwningPlayer().getPlayer();
-        if (target == null || !target.isOnline()) {
-            player.sendRichMessage("<red>Player is no longer online.</red>");
-            player.closeInventory();
-            return;
-        }
-
-        player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 1.5f);
-        player.closeInventory();
-        player.performCommand("tpa " + target.getName());
     }
 }
