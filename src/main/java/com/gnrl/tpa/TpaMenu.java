@@ -66,7 +66,8 @@ public class TpaMenu {
 
         List<Component> logoLore = new ArrayList<>();
         logoLore.add(Component.text(""));
-        logoLore.add(Component.text(here ? "Request players to come to you" : "Request to teleport to a player",
+        logoLore.add(Component.text(
+                here ? "Request players to come to you" : "Request to teleport to a player",
                 NamedTextColor.GRAY));
         logoLore.add(Component.text(""));
         logoLore.add(Component.text("Plugin by ", NamedTextColor.GRAY)
