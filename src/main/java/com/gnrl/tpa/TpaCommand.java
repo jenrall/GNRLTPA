@@ -30,8 +30,9 @@ public class TpaCommand implements CommandExecutor {
             return true;
         }
 
+        // اگه آرگومان نداشت، GUI باز کن
         if (args.length == 0) {
-            player.sendRichMessage("<yellow>Usage: /tpa <player></yellow>");
+            new TpaMenu(plugin, manager).openMenu(player, false);
             return true;
         }
 
