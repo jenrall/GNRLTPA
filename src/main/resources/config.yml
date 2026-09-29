@@ -1,59 +1,31 @@
-# GNRLTPA Configuration
-# Plugin by GNRLFlawless
-# https://github.com/jenrall/GNRLTPA
-
-# Time settings (in seconds)
 settings:
-  # How long a TPA request stays valid before expiring
-  request-timeout: 60
-  # Cooldown between sending TPA requests (0 to disable)
-  cooldown: 10
-  # Delay before teleport happens (0 for instant)
-  teleport-delay: 3
-  # Cancel teleport if player moves during delay
+  request-timeout-seconds: 60
+  cooldown-seconds: 10
+  teleport-delay-seconds: 3
   cancel-on-move: true
 
-# Sound effects
-sounds:
-  enabled: true
-  request-sent: BLOCK_NOTE_BLOCK_PLING
-  request-received: BLOCK_NOTE_BLOCK_PLING
-  request-accepted: ENTITY_EXPERIENCE_ORB_PICKUP
-  request-denied: BLOCK_NOTE_BLOCK_BASS
-  teleport: ENTITY_ENDERMAN_TELEPORT
-  menu-open: BLOCK_CHEST_OPEN
-
-# Particle effects
-particles:
-  enabled: true
-  before-teleport: PORTAL
-  after-teleport: REVERSE_PORTAL
-  count: 50
-
-# Messages (supports MiniMessage format)
 messages:
   prefix: "<gold>[GNRLTPA] <reset>"
   no-permission: "<red>You don't have permission.</red>"
   player-not-found: "<red>Player not found.</red>"
   self-request: "<red>You can't send a request to yourself.</red>"
-  cooldown: "<red>Please wait <yellow><seconds></yellow> more seconds.</red>"
-  already-pending: "<red>That player already has a pending request.</red>"
-  no-pending-request: "<red>You have no pending request.</red>"
   request-sent: "<green>Request sent to <yellow><player></yellow>.</green>"
   request-received: "<yellow><player></yellow> <green>wants to teleport to you.</green>"
   request-denied: "<red><player> denied your request.</red>"
-  here-request-sent: "<green>Request sent to <yellow><player></yellow> to teleport to you.</green>"
-  here-request-received: "<yellow><player></yellow> <green>wants you to teleport to them.</green>"
+  no-pending-request: "<red>You have no pending request.</red>"
   teleporting: "<green>Teleporting in <yellow><seconds></yellow> seconds...</green>"
   teleported: "<green>Teleported successfully.</green>"
-  teleport-cancelled-move: "<red>Teleport cancelled because you moved.</red>"
+  cooldown: "<red>Please wait before sending another request.</red>"
+  already-pending: "<red>That player already has a pending request.</red>"
+  tpa-disabled: "<red>That player has TPA disabled.</red>"
+  tpa-toggled-on: "<green>✔ TPA requests are now <yellow>ENABLED</yellow>.</green>"
+  tpa-toggled-off: "<red>✖ TPA requests are now <yellow>DISABLED</yellow>.</red>"
+  blocked-player: "<yellow>✔ You blocked <player>.</yellow>"
+  unblocked-player: "<yellow>✔ You unblocked <player>.</yellow>"
+  you-are-blocked: "<red>That player has blocked you.</red>"
+  reloaded: "<green>✔ Config reloaded.</green>"
 
-# GUI settings
 gui:
-  title: "<gold>TPA Menu"
+  title-tpa: "✦ TPA Menu ✦"
+  title-tpahere: "✦ TPAHere Menu ✦"
   rows: 6
-  fill-empty: true
-  glass-color: GRAY
-  show-logo: true
-  show-health: true
-  show-world: true
