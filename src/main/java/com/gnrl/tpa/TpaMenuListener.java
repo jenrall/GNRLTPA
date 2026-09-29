@@ -1,5 +1,6 @@
 package com.gnrl.tpa;
 
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,10 +13,12 @@ public class TpaMenuListener implements Listener {
 
     private final GNRLTPA plugin;
     private final TpaManager manager;
+    private final TpaMenu menu;
 
-    public TpaMenuListener(GNRLTPA plugin, TpaManager manager) {
+    public TpaMenuListener(GNRLTPA plugin, TpaManager manager, TpaMenu menu) {
         this.plugin = plugin;
         this.manager = manager;
+        this.menu = menu;
     }
 
     @EventHandler
@@ -30,7 +33,41 @@ public class TpaMenuListener implements Listener {
         event.setCancelled(true);
 
         ItemStack clicked = event.getCurrentItem();
-        if (clicked == null || clicked.getItemMeta() == null) return;
+        if (clicked == null || clicked.getType() == Material.AIR) return;
+
+        int slot = event.getRawSlot();
+        int size = event.getInventory().getSize();
+
+        // دکمه Close
+        if (slot == size - 5) {
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 0.8f);
+            player.closeInventory();
+            return;
+        }
+
+        // دکمه Refresh
+        if (slot == size - 1) {
+            player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 1.5f);
+            menu.openMenu(player, isTpaHere, menu.getPage(player));
+            return;
+        }
+
+        // دکمه Previous
+        if (slot == size - 9) {
+            int page = menu.getPage(player);
+            menu.openMenu(player, isTpaHere, page - 1);
+            return;
+        }
+
+        // دکمه Next
+        if (slot == size - 2) {
+            int page = menu.getPage(player);
+            menu.openMenu(player, isTpaHere, page + 1);
+            return;
+        }
+
+        // کلیک روی سر بازیکن
+        if (clicked.getType() != Material.PLAYER_HEAD) return;
         if (!(clicked.getItemMeta() instanceof SkullMeta skullMeta)) return;
         if (skullMeta.getOwningPlayer() == null) return;
 
