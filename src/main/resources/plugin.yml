@@ -6,6 +6,7 @@ description: Modern TPA plugin by GNRLFlawless
 author: GNRLFlawless
 authors: [GNRLFlawless]
 website: https://github.com/jenrall/GNRLTPA
+softdepend: [PlaceholderAPI]
 
 commands:
   tpa:
@@ -26,6 +27,15 @@ commands:
   tpauto:
     description: Toggle auto-accept
     usage: /tpauto
+  tptoggle:
+    description: Toggle receiving TPA requests
+    usage: /tptoggle
+  tpblock:
+    description: Block a player from sending TPA
+    usage: /tpblock <player>
+  tpreload:
+    description: Reload the plugin config
+    usage: /tpreload
 
 permissions:
   gnrltpa.use:
