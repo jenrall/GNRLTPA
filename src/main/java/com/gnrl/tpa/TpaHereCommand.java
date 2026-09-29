@@ -30,8 +30,9 @@ public class TpaHereCommand implements CommandExecutor {
             return true;
         }
 
+        // اگه آرگومان نداشت، GUI باز کن
         if (args.length == 0) {
-            player.sendRichMessage("<yellow>Usage: /tpahere <player></yellow>");
+            new TpaMenu(plugin, manager).openMenu(player, true);
             return true;
         }
 
