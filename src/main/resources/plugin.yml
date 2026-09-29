@@ -20,7 +20,15 @@ commands:
   tpdeny:
     description: Deny a teleport request
     usage: /tpdeny
+  tpacancel:
+    description: Cancel your sent request
+    usage: /tpacancel
+  tpauto:
+    description: Toggle auto-accept
+    usage: /tpauto
 
 permissions:
   gnrltpa.use:
     default: true
+  gnrltpa.admin:
+    default: op
