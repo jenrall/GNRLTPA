@@ -22,4 +22,42 @@ public class GNRLTPA extends JavaPlugin {
         getCommand("tpacancel").setExecutor(new TpaCancelCommand(this, tpaManager));
         getCommand("tpauto").setExecutor(new TpaAutoCommand(this, tpaManager));
         getCommand("tptoggle").setExecutor(new TpaToggleCommand(this));
-       
+        getCommand("tpblock").setExecutor(new TpaBlockCommand(this));
+        getCommand("tpreload").setExecutor(new TpaReloadCommand(this));
+
+        getServer().getPluginManager().registerEvents(
+                new TpaMenuListener(this, tpaManager, tpaMenu), this);
+
+        printLogo();
+    }
+
+    private void printLogo() {
+        getLogger().info("");
+        getLogger().info("  \u001B[33m╔══════════════════════════════════════╗");
+        getLogger().info("  \u001B[33m║  \u001B[36m✦ GNRLTPA v1.0.0 ✦\u001B[33m                  ║");
+        getLogger().info("  \u001B[33m║  \u001B[37mAuthor: GNRLFlawless\u001B[33m                 ║");
+        getLogger().info("  \u001B[33m║  \u001B[37mgithub.com/jenrall/GNRLTPA\u001B[33m          ║");
+        getLogger().info("  \u001B[33m╚══════════════════════════════════════╝");
+        getLogger().info("  \u001B[32m✔ Plugin loaded successfully!");
+        getLogger().info("");
+    }
+
+    @Override
+    public void onDisable() {
+        if (tpaManager != null) {
+            tpaManager.clearAll();
+        }
+    }
+
+    public TpaManager getTpaManager() {
+        return tpaManager;
+    }
+
+    public PlayerSettings getPlayerSettings() {
+        return playerSettings;
+    }
+
+    public TpaMenu getTpaMenu() {
+        return tpaMenu;
+    }
+}
