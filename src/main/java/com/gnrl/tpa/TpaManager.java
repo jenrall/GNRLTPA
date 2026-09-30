@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,7 +17,7 @@ public class TpaManager {
     private final Map<UUID, TpaRequest> pendingRequests = new ConcurrentHashMap<>();
     private final Map<UUID, Long> cooldowns = new ConcurrentHashMap<>();
     private final Map<UUID, BukkitTask> pendingTeleports = new ConcurrentHashMap<>();
-    private final java.util.Set<UUID> autoAccept = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> autoAccept = ConcurrentHashMap.newKeySet();
 
     public TpaManager(GNRLTPA plugin) {
         this.plugin = plugin;
@@ -52,12 +53,16 @@ public class TpaManager {
 
         pendingRequests.put(targetId, new TpaRequest(senderId, targetId, here, System.currentTimeMillis()));
 
+        // اگه گیرنده auto-accept داره، فوری قبول کن
         if (isAutoAccept(target)) {
             sender.sendRichMessage("<green>" + target.getName() + " has auto-accept enabled.</green>");
             target.sendRichMessage("<green>Auto-accepted request from " + sender.getName() + "</green>");
             acceptRequest(target);
             return;
         }
+
+        // باز کردن GUI برای گیرنده
+        new TpaRequestMenu(plugin, this).openRequestMenu(target, sender, here);
 
         int timeout = plugin.getConfig().getInt("settings.request-timeout-seconds", 60);
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
