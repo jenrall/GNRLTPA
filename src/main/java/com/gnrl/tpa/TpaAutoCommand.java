@@ -53,9 +53,7 @@ public class TpaAutoCommand implements CommandExecutor {
                 };
                 player.sendRichMessage(plugin.getConfig().getString(key, def));
             }
-            default -> {
-                player.sendRichMessage("<yellow>Usage: /tpauto <allow|deny|toggle></yellow>");
-            }
+            default -> player.sendRichMessage("<yellow>Usage: /tpauto <allow|deny|toggle></yellow>");
         }
 
         return true;
