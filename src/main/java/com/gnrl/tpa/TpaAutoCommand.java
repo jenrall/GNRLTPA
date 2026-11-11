@@ -40,18 +40,9 @@ public class TpaAutoCommand implements CommandExecutor {
                         "<red>✔ Auto-Deny <yellow>ENABLED</yellow>.</red>"));
             }
             case "toggle" -> {
-                TpaManager.AutoMode next = manager.cycleAutoMode(player);
-                String key = switch (next) {
-                    case ALLOW -> "messages.auto-allow-on";
-                    case DENY  -> "messages.auto-deny-on";
-                    case ASK   -> "messages.auto-ask-on";
-                };
-                String def = switch (next) {
-                    case ALLOW -> "<green>✔ Auto-Accept <yellow>ENABLED</yellow>.</green>";
-                    case DENY  -> "<red>✔ Auto-Deny <yellow>ENABLED</yellow>.</red>";
-                    case ASK   -> "<gray>✔ Auto mode <yellow>DISABLED</yellow> (ask).</gray>";
-                };
-                player.sendRichMessage(plugin.getConfig().getString(key, def));
+                manager.setAutoMode(player, TpaManager.AutoMode.ASK);
+                player.sendRichMessage(plugin.getConfig().getString("messages.auto-ask-on",
+                        "<gray>✔ Auto mode <yellow>DISABLED</yellow> (ask).</gray>"));
             }
             default -> player.sendRichMessage("<yellow>Usage: /tpauto <allow|deny|toggle></yellow>");
         }
