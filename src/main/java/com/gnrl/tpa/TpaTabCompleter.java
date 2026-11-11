@@ -14,14 +14,13 @@ import java.util.List;
 
 public class TpaTabCompleter implements TabCompleter {
 
-    private static final List<String> AUTO_MODES = Arrays.asList("allow", "deny", "accept");
+    private static final List<String> AUTO_MODES = Arrays.asList("toggle", "deny", "accept");
 
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
                                       @NotNull String alias, @NotNull String[] args) {
         List<String> completions = new ArrayList<>();
 
-        // برای /tpa و /tpahere: آرگومان اول = نام بازیکنان آنلاین
         if (command.getName().equalsIgnoreCase("tpa") || command.getName().equalsIgnoreCase("tpahere")) {
             if (args.length == 1) {
                 List<String> names = new ArrayList<>();
@@ -33,7 +32,6 @@ public class TpaTabCompleter implements TabCompleter {
             return completions;
         }
 
-        // برای /tpauto: آرگومان اول = allow/deny/accept
         if (command.getName().equalsIgnoreCase("tpauto")) {
             if (args.length == 1) {
                 StringUtil.copyPartialMatches(args[0], AUTO_MODES, completions);
