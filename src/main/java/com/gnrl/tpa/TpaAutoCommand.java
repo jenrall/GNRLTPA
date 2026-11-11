@@ -22,7 +22,7 @@ public class TpaAutoCommand implements CommandExecutor {
         if (!(sender instanceof Player player)) return true;
 
         if (args.length == 0) {
-            player.sendRichMessage("<yellow>Usage: /tpauto <allow|deny|toggle></yellow>");
+            player.sendRichMessage("<yellow>Usage: /tpauto <allow|deny|accept></yellow>");
             return true;
         }
 
@@ -39,12 +39,12 @@ public class TpaAutoCommand implements CommandExecutor {
                 player.sendRichMessage(plugin.getConfig().getString("messages.auto-deny-on",
                         "<red>✔ Auto-Deny <yellow>ENABLED</yellow>.</red>"));
             }
-            case "toggle" -> {
+            case "accept" -> {
                 manager.setAutoMode(player, TpaManager.AutoMode.ASK);
                 player.sendRichMessage(plugin.getConfig().getString("messages.auto-ask-on",
-                        "<gray>✔ Auto mode <yellow>DISABLED</yellow> (ask).</gray>"));
+                        "<gray>✔ Auto mode <yellow>DISABLED</yellow> (manual accept).</gray>"));
             }
-            default -> player.sendRichMessage("<yellow>Usage: /tpauto <allow|deny|toggle></yellow>");
+            default -> player.sendRichMessage("<yellow>Usage: /tpauto <allow|deny|accept></yellow>");
         }
 
         return true;
