@@ -18,7 +18,10 @@ public class TpaMoveListener implements Listener {
         Player player = event.getPlayer();
         if (!manager.isTeleportPending(player)) return;
 
-        if (event.getFrom().distanceSquared(event.getTo()) > 0.01) {
+        // بررسی حرکت واقعی (نه فقط چرخش سر)
+        if (event.getFrom().getX() != event.getTo().getX()
+                || event.getFrom().getY() != event.getTo().getY()
+                || event.getFrom().getZ() != event.getTo().getZ()) {
             manager.cancelTeleportOnMove(player);
         }
     }
