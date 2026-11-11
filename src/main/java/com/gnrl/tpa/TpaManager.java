@@ -1,6 +1,7 @@
 package com.gnrl.tpa;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -17,12 +18,17 @@ public class TpaManager {
     private final Map<UUID, TpaRequest> pendingRequests = new ConcurrentHashMap<>();
     private final Map<UUID, Long> cooldowns = new ConcurrentHashMap<>();
     private final Map<UUID, BukkitTask> pendingTeleports = new ConcurrentHashMap<>();
-    private final Set<UUID> autoAccept = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, Location> teleportStartLocations = new ConcurrentHashMap<>();
+
+    // حالت auto: هیچ‌کس در این Set نیست = ASK (پیش‌فرض)
+    private final Set<UUID> autoAccept = ConcurrentHashMap.newKeySet();   // allow
+    private final Set<UUID> autoDeny = ConcurrentHashMap.newKeySet();     // deny
 
     public TpaManager(GNRLTPA plugin) {
         this.plugin = plugin;
     }
 
+    // ---------- Cooldown ----------
     public boolean isOnCooldown(Player player) {
         long cooldown = plugin.getConfig().getLong("settings.cooldown-seconds", 10) * 1000L;
         Long lastUse = cooldowns.get(player.getUniqueId());
@@ -33,36 +39,69 @@ public class TpaManager {
         cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
     }
 
+    // ---------- Auto Modes ----------
+    public enum AutoMode { ASK, ALLOW, DENY }
+
+    public AutoMode getAutoMode(Player player) {
+        UUID id = player.getUniqueId();
+        if (autoAccept.contains(id)) return AutoMode.ALLOW;
+        if (autoDeny.contains(id)) return AutoMode.DENY;
+        return AutoMode.ASK;
+    }
+
+    public void setAutoMode(Player player, AutoMode mode) {
+        UUID id = player.getUniqueId();
+        autoAccept.remove(id);
+        autoDeny.remove(id);
+        switch (mode) {
+            case ALLOW -> autoAccept.add(id);
+            case DENY -> autoDeny.add(id);
+            case ASK -> { /* هیچ‌کدام */ }
+        }
+    }
+
+    public AutoMode cycleAutoMode(Player player) {
+        AutoMode current = getAutoMode(player);
+        AutoMode next = switch (current) {
+            case ASK -> AutoMode.ALLOW;
+            case ALLOW -> AutoMode.DENY;
+            case DENY -> AutoMode.ASK;
+        };
+        setAutoMode(player, next);
+        return next;
+    }
+
     public boolean isAutoAccept(Player player) {
         return autoAccept.contains(player.getUniqueId());
     }
 
-    public boolean toggleAutoAccept(Player player) {
-        UUID id = player.getUniqueId();
-        if (autoAccept.contains(id)) {
-            autoAccept.remove(id);
-            return false;
-        }
-        autoAccept.add(id);
-        return true;
-    }
-
+    // ---------- Send Request ----------
     public void sendRequest(Player sender, Player target, boolean here) {
         UUID targetId = target.getUniqueId();
         UUID senderId = sender.getUniqueId();
 
         pendingRequests.put(targetId, new TpaRequest(senderId, targetId, here, System.currentTimeMillis()));
 
-        // اگه گیرنده auto-accept داره، فوری قبول کن
-        if (isAutoAccept(target)) {
+        AutoMode mode = getAutoMode(target);
+
+        // اگر ALLOW → فوری قبول
+        if (mode == AutoMode.ALLOW) {
             sender.sendRichMessage("<green>" + target.getName() + " has auto-accept enabled.</green>");
             target.sendRichMessage("<green>Auto-accepted request from " + sender.getName() + "</green>");
             acceptRequest(target);
             return;
         }
 
-        // باز کردن GUI برای گیرنده
-        new TpaRequestMenu(plugin, this).openRequestMenu(target, sender, here);
+        // اگر DENY → فوری رد
+        if (mode == AutoMode.DENY) {
+            pendingRequests.remove(targetId);
+            sender.sendRichMessage("<red>" + target.getName() + " has auto-deny enabled.</red>");
+            target.sendRichMessage("<red>Auto-denied request from " + sender.getName() + "</red>");
+            return;
+        }
+
+        // حالت ASK → پیام با دکمه به گیرنده (GUI باز نمی‌شود)
+        TpaHelper.sendRequestToTarget(plugin, sender, target, here);
 
         int timeout = plugin.getConfig().getInt("settings.request-timeout-seconds", 60);
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -96,7 +135,23 @@ public class TpaManager {
         return false;
     }
 
+    // ---------- Accept (بعد از کلیک روی Accept در چت → GUI باز می‌شود) ----------
     public void acceptRequest(Player target) {
+        TpaRequest request = pendingRequests.get(target.getUniqueId());
+        if (request == null) return;
+
+        Player sender = Bukkit.getPlayer(request.senderId());
+        if (sender == null || !sender.isOnline()) {
+            pendingRequests.remove(target.getUniqueId());
+            return;
+        }
+
+        // باز کردن GUI تأیید نهایی
+        new TpaRequestMenu(plugin, this).openRequestMenu(target, sender, request.here());
+    }
+
+    // ---------- تأیید نهایی از داخل GUI ----------
+    public void confirmRequest(Player target) {
         TpaRequest request = pendingRequests.remove(target.getUniqueId());
         if (request == null) return;
 
@@ -118,14 +173,36 @@ public class TpaManager {
         sender.sendRichMessage(teleportingMsg);
         target.sendRichMessage(teleportingMsg);
 
+        boolean cancelOnMove = plugin.getConfig().getBoolean("settings.cancel-on-move", true);
+        Player whoMoves = request.here() ? target : sender;
+
+        if (cancelOnMove) {
+            teleportStartLocations.put(whoMoves.getUniqueId(), whoMoves.getLocation().clone());
+        }
+
         BukkitTask task = Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            pendingTeleports.remove(sender.getUniqueId());
+            pendingTeleports.remove(whoMoves.getUniqueId());
+            teleportStartLocations.remove(whoMoves.getUniqueId());
             if (sender.isOnline() && target.isOnline()) {
                 doTeleport(sender, target, request.here());
             }
         }, delay * 20L);
 
-        pendingTeleports.put(sender.getUniqueId(), task);
+        pendingTeleports.put(whoMoves.getUniqueId(), task);
+    }
+
+    // ---------- چک حرکت (از Listener صدا زده می‌شود) ----------
+    public boolean isTeleportPending(Player player) {
+        return pendingTeleports.containsKey(player.getUniqueId());
+    }
+
+    public void cancelTeleportOnMove(Player player) {
+        BukkitTask task = pendingTeleports.remove(player.getUniqueId());
+        Location start = teleportStartLocations.remove(player.getUniqueId());
+        if (task != null) {
+            task.cancel();
+            player.sendRichMessage(plugin.getConfig().getString("messages.teleport-cancelled", ""));
+        }
     }
 
     private void doTeleport(Player sender, Player target, boolean here) {
@@ -164,6 +241,7 @@ public class TpaManager {
     public void clearAll() {
         pendingTeleports.values().forEach(BukkitTask::cancel);
         pendingTeleports.clear();
+        teleportStartLocations.clear();
         pendingRequests.clear();
     }
 
