@@ -25,8 +25,8 @@ commands:
     description: Cancel your sent request
     usage: /tpacancel
   tpauto:
-    description: Manage auto mode (allow/deny/toggle)
-    usage: /tpauto <allow|deny|toggle>
+    description: Manage auto mode (toggle/deny/accept)
+    usage: /tpauto <toggle|deny|accept>
   tptoggle:
     description: Toggle receiving TPA requests
     usage: /tptoggle
