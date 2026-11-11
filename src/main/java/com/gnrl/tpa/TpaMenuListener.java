@@ -92,11 +92,11 @@ public class TpaMenuListener implements Listener {
 
         int slot = event.getRawSlot();
 
-        if (slot == 11) { // Accept → تأیید نهایی
+        if (slot == 11) {
             player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.5f);
             player.closeInventory();
             manager.confirmRequest(player);
-        } else if (slot == 15) { // Deny
+        } else if (slot == 15) {
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.5f);
             player.closeInventory();
             player.performCommand("tpdeny");
