@@ -25,11 +25,9 @@ public class TpaMenuListener implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getWhoClicked() instanceof Player player)) return;
 
-        // منوی انتخاب بازیکن (TPA / TPAHere)
         boolean isTpa = event.getView().title().equals(TpaMenu.TPA_TITLE);
         boolean isTpaHere = event.getView().title().equals(TpaMenu.TPAHERE_TITLE);
 
-        // منوی درخواست (گیرنده)
         boolean isRequest = event.getView().title().equals(TpaRequestMenu.TITLE);
         boolean isRequestHere = event.getView().title().equals(TpaRequestMenu.TITLE_HERE);
 
@@ -40,7 +38,6 @@ public class TpaMenuListener implements Listener {
 
         if (isRequest || isRequestHere) {
             handleRequestMenu(event, player);
-            return;
         }
     }
 
@@ -53,24 +50,21 @@ public class TpaMenuListener implements Listener {
         int slot = event.getRawSlot();
         int size = event.getInventory().getSize();
 
-        if (slot == size - 5) { // Close
+        if (slot == size - 5) {
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 0.8f);
             player.closeInventory();
             return;
         }
-
-        if (slot == size - 1) { // Refresh
+        if (slot == size - 1) {
             player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 1.5f);
             menu.openMenu(player, isTpaHere, menu.getPage(player));
             return;
         }
-
-        if (slot == size - 9) { // Previous
+        if (slot == size - 9) {
             menu.openMenu(player, isTpaHere, menu.getPage(player) - 1);
             return;
         }
-
-        if (slot == size - 2) { // Next
+        if (slot == size - 2) {
             menu.openMenu(player, isTpaHere, menu.getPage(player) + 1);
             return;
         }
@@ -89,11 +83,8 @@ public class TpaMenuListener implements Listener {
         player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1f, 1.5f);
         player.closeInventory();
 
-        if (isTpaHere) {
-            player.performCommand("tpahere " + target.getName());
-        } else {
-            player.performCommand("tpa " + target.getName());
-        }
+        if (isTpaHere) player.performCommand("tpahere " + target.getName());
+        else player.performCommand("tpa " + target.getName());
     }
 
     private void handleRequestMenu(InventoryClickEvent event, Player player) {
@@ -101,10 +92,10 @@ public class TpaMenuListener implements Listener {
 
         int slot = event.getRawSlot();
 
-        if (slot == 11) { // Accept
+        if (slot == 11) { // Accept → تأیید نهایی
             player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1.5f);
             player.closeInventory();
-            player.performCommand("tpaccept");
+            manager.confirmRequest(player);
         } else if (slot == 15) { // Deny
             player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1f, 0.5f);
             player.closeInventory();
