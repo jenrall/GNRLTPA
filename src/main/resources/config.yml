@@ -15,7 +15,7 @@ messages:
   no-pending-request: "<red>You have no pending request.</red>"
   teleporting: "<green>Teleporting in <yellow><seconds></yellow> seconds...</green>"
   teleported: "<green>Teleported successfully.</green>"
-  teleport-cancelled: "<red>✖ Teleport cancelled (you moved).</red>"   # ← جدید
+  teleport-cancelled: "<red>✖ Teleport cancelled (you moved).</red>"
   cooldown: "<red>Please wait before sending another request.</red>"
   already-pending: "<red>That player already has a pending request.</red>"
   tpa-disabled: "<red>That player has TPA disabled.</red>"
@@ -25,9 +25,9 @@ messages:
   unblocked-player: "<yellow>✔ You unblocked <player>.</yellow>"
   you-are-blocked: "<red>That player has blocked you.</red>"
   reloaded: "<green>✔ Config reloaded.</green>"
-  auto-allow-on: "<green>✔ Auto-Accept <yellow>ENABLED</yellow>.</green>"   # ← جدید
-  auto-deny-on: "<red>✔ Auto-Deny <yellow>ENABLED</yellow>.</red>"          # ← جدید
-  auto-ask-on: "<gray>✔ Auto mode <yellow>DISABLED</yellow> (ask).</gray>"  # ← جدید
+  auto-allow-on: "<green>✔ Auto-Accept <yellow>ENABLED</yellow>.</green>"
+  auto-deny-on: "<red>✔ Auto-Deny <yellow>ENABLED</yellow>.</red>"
+  auto-ask-on: "<gray>✔ Auto mode <yellow>DISABLED</yellow> (ask).</gray>"
 
 gui:
   title-tpa: "✦ TPA Menu ✦"
