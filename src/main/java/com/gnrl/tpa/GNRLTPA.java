@@ -12,7 +12,7 @@ public class GNRLTPA extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         tpaManager = new TpaManager(this);
-        this.playerSettings = new PlayerSettings();   // ← این خط اصلاح شد (this. اضافه شد)
+        this.playerSettings = new PlayerSettings();
         tpaMenu = new TpaMenu(this, tpaManager);
 
         getCommand("tpa").setExecutor(new TpaCommand(this, tpaManager));
@@ -28,7 +28,7 @@ public class GNRLTPA extends JavaPlugin {
         getServer().getPluginManager().registerEvents(
                 new TpaMenuListener(this, tpaManager, tpaMenu), this);
         getServer().getPluginManager().registerEvents(
-                new TpaDialogListener(this, tpaManager), this);   // ← ثبت TpaDialogListener هم اضافه شد
+                new TpaMoveListener(tpaManager), this);
 
         printLogo();
     }
@@ -51,7 +51,15 @@ public class GNRLTPA extends JavaPlugin {
         }
     }
 
-    public TpaManager getTpaManager() { return tpaManager; }
-    public PlayerSettings getPlayerSettings() { return playerSettings; }
-    public TpaMenu getTpaMenu() { return tpaMenu; }
+    public TpaManager getTpaManager() {
+        return tpaManager;
+    }
+
+    public PlayerSettings getPlayerSettings() {
+        return playerSettings;
+    }
+
+    public TpaMenu getTpaMenu() {
+        return tpaMenu;
+    }
 }
