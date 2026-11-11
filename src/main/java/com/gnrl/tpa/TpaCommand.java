@@ -1,7 +1,5 @@
 package com.gnrl.tpa;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -46,13 +44,11 @@ public class TpaCommand implements CommandExecutor {
             return true;
         }
 
-        // چک Toggle
         if (plugin.getPlayerSettings().isTpaDisabled(target.getUniqueId())) {
             player.sendRichMessage(plugin.getConfig().getString("messages.tpa-disabled", ""));
             return true;
         }
 
-        // چک Block
         if (plugin.getPlayerSettings().isBlocked(target.getUniqueId(), player.getUniqueId())) {
             player.sendRichMessage(plugin.getConfig().getString("messages.you-are-blocked", ""));
             return true;
@@ -72,20 +68,6 @@ public class TpaCommand implements CommandExecutor {
         manager.setCooldown(player);
 
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.5f);
-
-        player.sendMessage(Component.text(""));
-        player.sendMessage(Component.text("  ╭──────────────────────────╮", NamedTextColor.GOLD));
-        player.sendMessage(Component.text("  │  ", NamedTextColor.GOLD)
-                .append(Component.text("✦ TPA Request Sent ✦", NamedTextColor.AQUA))
-                .append(Component.text("  │", NamedTextColor.GOLD)));
-        player.sendMessage(Component.text("  │  ", NamedTextColor.GOLD)
-                .append(Component.text("to: ", NamedTextColor.GRAY))
-                .append(Component.text(target.getName(), NamedTextColor.YELLOW))
-                .append(Component.text("              │", NamedTextColor.GOLD)));
-        player.sendMessage(Component.text("  ╰──────────────────────────╯", NamedTextColor.GOLD));
-        player.sendMessage(Component.text(""));
-
-        TpaHelper.sendRequestToTarget(plugin, player, target, false);
 
         return true;
     }
