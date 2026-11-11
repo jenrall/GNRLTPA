@@ -25,6 +25,11 @@ public class GNRLTPA extends JavaPlugin {
         getCommand("tpblock").setExecutor(new TpaBlockCommand(this));
         getCommand("tpreload").setExecutor(new TpaReloadCommand(this));
 
+        TpaTabCompleter tabCompleter = new TpaTabCompleter();
+        getCommand("tpa").setTabCompleter(tabCompleter);
+        getCommand("tpahere").setTabCompleter(tabCompleter);
+        getCommand("tpauto").setTabCompleter(tabCompleter);
+
         getServer().getPluginManager().registerEvents(
                 new TpaMenuListener(this, tpaManager, tpaMenu), this);
         getServer().getPluginManager().registerEvents(
