@@ -27,6 +27,7 @@ public class TpaManager {
         this.plugin = plugin;
     }
 
+    // ---------- Cooldown ----------
     public boolean isOnCooldown(Player player) {
         long cooldown = plugin.getConfig().getLong("settings.cooldown-seconds", 10) * 1000L;
         Long lastUse = cooldowns.get(player.getUniqueId());
@@ -37,6 +38,7 @@ public class TpaManager {
         cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
     }
 
+    // ---------- Auto Modes ----------
     public enum AutoMode { ASK, ALLOW, DENY }
 
     public AutoMode getAutoMode(Player player) {
@@ -72,6 +74,7 @@ public class TpaManager {
         return autoAccept.contains(player.getUniqueId());
     }
 
+    // ---------- Send Request ----------
     public void sendRequest(Player sender, Player target, boolean here) {
         UUID targetId = target.getUniqueId();
         UUID senderId = sender.getUniqueId();
@@ -80,6 +83,7 @@ public class TpaManager {
 
         AutoMode mode = getAutoMode(target);
 
+        // حالت ALLOW: فوری قبول
         if (mode == AutoMode.ALLOW) {
             sender.sendRichMessage("<green>" + target.getName() + " has auto-accept enabled.</green>");
             target.sendRichMessage("<green>Auto-accepted request from " + sender.getName() + "</green>");
@@ -87,13 +91,13 @@ public class TpaManager {
             return;
         }
 
+        // حالت DENY: هیچ پیامی فرستاده نمی‌شود
         if (mode == AutoMode.DENY) {
             pendingRequests.remove(targetId);
-            sender.sendRichMessage("<red>" + target.getName() + " has auto-deny enabled.</red>");
-            target.sendRichMessage("<red>Auto-denied request from " + sender.getName() + "</red>");
             return;
         }
 
+        // حالت ASK: پیام با دکمه به گیرنده
         TpaHelper.sendRequestToTarget(plugin, sender, target, here);
 
         int timeout = plugin.getConfig().getInt("settings.request-timeout-seconds", 60);
@@ -128,6 +132,7 @@ public class TpaManager {
         return false;
     }
 
+    // ---------- Accept (از دکمه چت → GUI) ----------
     public void acceptRequest(Player target) {
         TpaRequest request = pendingRequests.get(target.getUniqueId());
         if (request == null) return;
@@ -141,6 +146,7 @@ public class TpaManager {
         new TpaRequestMenu(plugin, this).openRequestMenu(target, sender, request.here());
     }
 
+    // ---------- تأیید نهایی از GUI ----------
     public void confirmRequest(Player target) {
         TpaRequest request = pendingRequests.remove(target.getUniqueId());
         if (request == null) return;
@@ -181,6 +187,7 @@ public class TpaManager {
         pendingTeleports.put(whoMoves.getUniqueId(), task);
     }
 
+    // ---------- چک و لغو تلپورت ----------
     public boolean isTeleportPending(Player player) {
         return pendingTeleports.containsKey(player.getUniqueId());
     }
@@ -190,10 +197,14 @@ public class TpaManager {
         teleportStartLocations.remove(player.getUniqueId());
         if (task != null) {
             task.cancel();
-            player.sendRichMessage(plugin.getConfig().getString("messages.teleport-cancelled", ""));
+            String msg = plugin.getConfig().getString("messages.teleport-cancelled", "");
+            if (!msg.isEmpty()) {
+                player.sendRichMessage(msg);
+            }
         }
     }
 
+    // ---------- انجام تلپورت ----------
     private void doTeleport(Player sender, Player target, boolean here) {
         Player whoMoves = here ? target : sender;
         Player whoStays = here ? sender : target;
@@ -212,6 +223,7 @@ public class TpaManager {
         whoStays.sendRichMessage(plugin.getConfig().getString("messages.teleported", ""));
     }
 
+    // ---------- Deny ----------
     public void denyRequest(Player target) {
         TpaRequest request = pendingRequests.remove(target.getUniqueId());
         if (request == null) return;
@@ -227,6 +239,7 @@ public class TpaManager {
         }
     }
 
+    // ---------- پاکسازی ----------
     public void clearAll() {
         pendingTeleports.values().forEach(BukkitTask::cancel);
         pendingTeleports.clear();
