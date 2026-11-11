@@ -23,12 +23,13 @@ public class TpaHelper {
                 .append(Component.text("            │", NamedTextColor.GOLD)));
         target.sendMessage(Component.text("  ╰──────────────────────────╯", NamedTextColor.GOLD));
 
+        // دکمه Accept: بعد از کلیک، دستور /tpacceptgui اجرا می‌شود که GUI را باز می‌کند
         Component accept = Component.text("  ►  ", NamedTextColor.DARK_GRAY)
                 .append(Component.text("ACCEPT", NamedTextColor.GREEN))
                 .append(Component.text("  ◄  ", NamedTextColor.DARK_GRAY))
                 .clickEvent(ClickEvent.runCommand("/tpaccept"))
                 .hoverEvent(HoverEvent.showText(
-                        Component.text("Click to accept", NamedTextColor.GREEN)));
+                        Component.text("Click to review & accept", NamedTextColor.GREEN)));
 
         Component deny = Component.text("  ►  ", NamedTextColor.DARK_GRAY)
                 .append(Component.text("DENY", NamedTextColor.RED))
