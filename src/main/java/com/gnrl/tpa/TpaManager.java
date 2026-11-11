@@ -20,15 +20,13 @@ public class TpaManager {
     private final Map<UUID, BukkitTask> pendingTeleports = new ConcurrentHashMap<>();
     private final Map<UUID, Location> teleportStartLocations = new ConcurrentHashMap<>();
 
-    // حالت auto: هیچ‌کس در این Set نیست = ASK (پیش‌فرض)
-    private final Set<UUID> autoAccept = ConcurrentHashMap.newKeySet();   // allow
-    private final Set<UUID> autoDeny = ConcurrentHashMap.newKeySet();     // deny
+    private final Set<UUID> autoAccept = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> autoDeny = ConcurrentHashMap.newKeySet();
 
     public TpaManager(GNRLTPA plugin) {
         this.plugin = plugin;
     }
 
-    // ---------- Cooldown ----------
     public boolean isOnCooldown(Player player) {
         long cooldown = plugin.getConfig().getLong("settings.cooldown-seconds", 10) * 1000L;
         Long lastUse = cooldowns.get(player.getUniqueId());
@@ -39,7 +37,6 @@ public class TpaManager {
         cooldowns.put(player.getUniqueId(), System.currentTimeMillis());
     }
 
-    // ---------- Auto Modes ----------
     public enum AutoMode { ASK, ALLOW, DENY }
 
     public AutoMode getAutoMode(Player player) {
@@ -56,7 +53,7 @@ public class TpaManager {
         switch (mode) {
             case ALLOW -> autoAccept.add(id);
             case DENY -> autoDeny.add(id);
-            case ASK -> { /* هیچ‌کدام */ }
+            case ASK -> { }
         }
     }
 
@@ -75,7 +72,6 @@ public class TpaManager {
         return autoAccept.contains(player.getUniqueId());
     }
 
-    // ---------- Send Request ----------
     public void sendRequest(Player sender, Player target, boolean here) {
         UUID targetId = target.getUniqueId();
         UUID senderId = sender.getUniqueId();
@@ -84,7 +80,6 @@ public class TpaManager {
 
         AutoMode mode = getAutoMode(target);
 
-        // اگر ALLOW → فوری قبول
         if (mode == AutoMode.ALLOW) {
             sender.sendRichMessage("<green>" + target.getName() + " has auto-accept enabled.</green>");
             target.sendRichMessage("<green>Auto-accepted request from " + sender.getName() + "</green>");
@@ -92,7 +87,6 @@ public class TpaManager {
             return;
         }
 
-        // اگر DENY → فوری رد
         if (mode == AutoMode.DENY) {
             pendingRequests.remove(targetId);
             sender.sendRichMessage("<red>" + target.getName() + " has auto-deny enabled.</red>");
@@ -100,7 +94,6 @@ public class TpaManager {
             return;
         }
 
-        // حالت ASK → پیام با دکمه به گیرنده (GUI باز نمی‌شود)
         TpaHelper.sendRequestToTarget(plugin, sender, target, here);
 
         int timeout = plugin.getConfig().getInt("settings.request-timeout-seconds", 60);
@@ -135,7 +128,6 @@ public class TpaManager {
         return false;
     }
 
-    // ---------- Accept (بعد از کلیک روی Accept در چت → GUI باز می‌شود) ----------
     public void acceptRequest(Player target) {
         TpaRequest request = pendingRequests.get(target.getUniqueId());
         if (request == null) return;
@@ -146,11 +138,9 @@ public class TpaManager {
             return;
         }
 
-        // باز کردن GUI تأیید نهایی
         new TpaRequestMenu(plugin, this).openRequestMenu(target, sender, request.here());
     }
 
-    // ---------- تأیید نهایی از داخل GUI ----------
     public void confirmRequest(Player target) {
         TpaRequest request = pendingRequests.remove(target.getUniqueId());
         if (request == null) return;
@@ -191,14 +181,13 @@ public class TpaManager {
         pendingTeleports.put(whoMoves.getUniqueId(), task);
     }
 
-    // ---------- چک حرکت (از Listener صدا زده می‌شود) ----------
     public boolean isTeleportPending(Player player) {
         return pendingTeleports.containsKey(player.getUniqueId());
     }
 
     public void cancelTeleportOnMove(Player player) {
         BukkitTask task = pendingTeleports.remove(player.getUniqueId());
-        Location start = teleportStartLocations.remove(player.getUniqueId());
+        teleportStartLocations.remove(player.getUniqueId());
         if (task != null) {
             task.cancel();
             player.sendRichMessage(plugin.getConfig().getString("messages.teleport-cancelled", ""));
