@@ -11,10 +11,13 @@ public class GNRLTPA extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        tpaManager = new TpaManager(this);
-        this.playerSettings = new PlayerSettings();
-        tpaMenu = new TpaMenu(this, tpaManager);
+        
+        // راه‌اندازی منیجرها
+        this.tpaManager = new TpaManager(this);
+        this.playerSettings = new PlayerSettings(); // اگر ورودی داره، اینجا اضافه کن
+        this.tpaMenu = new TpaMenu(this, tpaManager);
 
+        // ثبت کامندها
         getCommand("tpa").setExecutor(new TpaCommand(this, tpaManager));
         getCommand("tpahere").setExecutor(new TpaHereCommand(this, tpaManager));
         getCommand("tpaccept").setExecutor(new TpaAcceptCommand(this, tpaManager));
@@ -25,15 +28,16 @@ public class GNRLTPA extends JavaPlugin {
         getCommand("tpblock").setExecutor(new TpaBlockCommand(this));
         getCommand("tpreload").setExecutor(new TpaReloadCommand(this));
 
-        TpaTabCompleter tabCompleter = new TpaTabCompleter();
-        getCommand("tpa").setTabCompleter(tabCompleter);
-        getCommand("tpahere").setTabCompleter(tabCompleter);
-        getCommand("tpauto").setTabCompleter(tabCompleter);
+        // ثبت تب‌کامپلتر (فعلاً غیرفعال تا از ارور جلوگیری شود)
+        // TpaTabCompleter tabCompleter = new TpaTabCompleter();
+        // getCommand("tpa").setTabCompleter(tabCompleter);
+        // getCommand("tpahere").setTabCompleter(tabCompleter);
+        // getCommand("tpauto").setTabCompleter(tabCompleter);
 
-        getServer().getPluginManager().registerEvents(
-                new TpaMenuListener(this, tpaManager, tpaMenu), this);
-        getServer().getPluginManager().registerEvents(
-                new TpaMoveListener(tpaManager), this);
+        // ثبت ایونت‌ها
+        getServer().getPluginManager().registerEvents(new TpaMenuListener(this), this);
+        getServer().getPluginManager().registerEvents(new TpaMoveListener(tpaManager), this);
+        getServer().getPluginManager().registerEvents(new TpaDialogListener(this), this);
 
         printLogo();
     }
