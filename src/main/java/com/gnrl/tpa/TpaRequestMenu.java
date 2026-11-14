@@ -21,19 +21,16 @@ public class TpaRequestMenu {
     }
 
     public void openRequestMenu(Player receiver, Player sender, boolean here) {
-        // ساخت منو با 3 ردیف (27 اسلات) - دقیقاً مثل استایل ItemsBlocker
         Gui gui = Gui.gui()
                 .title(Component.text(here ? "✦ TPAHere Request ✦" : "✦ TPA Request ✦", here ? NamedTextColor.AQUA : NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false))
                 .rows(3)
                 .disableAllInteractions()
                 .create();
 
-        // پس‌زمینه (قاب شیشه‌ای خاکستری)
         gui.getFiller().fill(ItemBuilder.from(Material.GRAY_STAINED_GLASS_PANE)
-                .name(Component.empty())
+                .name(Component.text(" "))
                 .asGuiItem());
 
-        // سر بازیکن (اسلات 13)
         gui.setItem(13, ItemBuilder.from(Material.PLAYER_HEAD)
                 .name(Component.text("✦ " + sender.getName() + " ✦", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false))
                 .lore(
@@ -45,20 +42,21 @@ public class TpaRequestMenu {
                         Component.text(here ? "Wants you to teleport to them" : "Wants to teleport to you", NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false)
                 )
                 .asGuiItem(item -> {
-                    ((SkullMeta) item.getItemMeta()).setOwningPlayer(sender);
+                    if (item.getItemMeta() instanceof SkullMeta meta) {
+                        meta.setOwningPlayer(sender);
+                        item.setItemMeta(meta);
+                    }
                 }));
 
-        // دکمه Accept (اسلات 11) - شبیه دکمه‌های پهن عکس
         gui.setItem(11, ItemBuilder.from(Material.LIME_STAINED_GLASS_PANE)
                 .name(Component.text("✔ ACCEPT", NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false))
                 .lore(Component.text("Click to accept this request", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))
                 .asGuiItem(event -> {
                     event.setCancelled(true);
                     receiver.closeInventory();
-                    manager.confirmRequest(receiver); // این متد رو باید توی TpaManager داشته باشی
+                    manager.confirmRequest(receiver);
                 }));
 
-        // دکمه Deny (اسلات 15)
         gui.setItem(15, ItemBuilder.from(Material.RED_STAINED_GLASS_PANE)
                 .name(Component.text("✖ DENY", NamedTextColor.RED).decoration(TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false))
                 .lore(Component.text("Click to deny this request", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))
