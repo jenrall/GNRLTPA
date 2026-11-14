@@ -57,12 +57,6 @@ public class TpaRequestMenu {
                 .append(Component.text((int) sender.getHealth() + "/20", NamedTextColor.RED)));
         headLore.add(Component.text("  📍 World: ", NamedTextColor.GRAY)
                 .append(Component.text(sender.getWorld().getName(), NamedTextColor.AQUA)));
-        headLore.add(Component.text("  📐 Coords: ", NamedTextColor.GRAY)
-                .append(Component.text(
-                        (int) sender.getLocation().getX() + ", " +
-                        (int) sender.getLocation().getY() + ", " +
-                        (int) sender.getLocation().getZ(),
-                        NamedTextColor.WHITE)));
         headLore.add(Component.text(""));
         headLore.add(Component.text(
                 here ? "  Wants you to teleport to them" : "  Wants to teleport to you",
