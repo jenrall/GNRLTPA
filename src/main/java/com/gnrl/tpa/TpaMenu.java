@@ -2,13 +2,11 @@ package com.gnrl.tpa;
 
 import io.papermc.paper.connection.PlayerGameConnection;
 import io.papermc.paper.dialog.Dialog;
-import io.papermc.paper.dialog.DialogResponseView;
 import io.papermc.paper.event.player.PlayerCustomClickEvent;
 import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.DialogBase;
 import io.papermc.paper.registry.data.dialog.action.DialogAction;
 import io.papermc.paper.registry.data.dialog.body.DialogBody;
-import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import io.papermc.paper.registry.data.dialog.type.DialogType;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -23,12 +21,12 @@ import org.bukkit.event.Listener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class TpaMenu implements Listener {
 
     private final GNRLTPA plugin;
     private final TpaManager manager;
+    private static final int PLAYERS_PER_PAGE = 10; // تعداد بازیکن در هر صفحه
 
     public TpaMenu(GNRLTPA plugin, TpaManager manager) {
         this.plugin = plugin;
@@ -36,110 +34,79 @@ public class TpaMenu implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    // مرحله ۱: نمایش دیالوگ جستجو به همراه لیست اسم بازیکن‌ها
-    public void openMenu(Player player, boolean here) {
-        List<Player> onlinePlayers = new ArrayList<>();
+    // متد اصلی که صفحه مشخصی را باز می‌کند
+    public void openMenu(Player player, boolean here, int page) {
+        List<Player> allPlayers = new ArrayList<>();
         for (Player p : Bukkit.getOnlinePlayers()) {
-            if (!p.equals(player)) onlinePlayers.add(p);
+            if (!p.equals(player)) allPlayers.add(p);
         }
 
-        if (onlinePlayers.isEmpty()) {
+        if (allPlayers.isEmpty()) {
             player.sendRichMessage("<yellow>هیچ بازیکن دیگری آنلاین نیست.</yellow>");
             return;
         }
 
-        // ساخت متن لیست بازیکن‌ها برای نمایش در بدنه دیالوگ
-        String names = onlinePlayers.stream()
-                .map(Player::getName)
-                .collect(Collectors.joining("، "));
+        int totalPages = (int) Math.ceil((double) allPlayers.size() / PLAYERS_PER_PAGE);
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
 
-        Component title = Component.text(here ? "✦ TPAHere - جستجو ✦" : "✦ TPA - جستجو ✦",
+        int start = (page - 1) * PLAYERS_PER_PAGE;
+        int end = Math.min(start + PLAYERS_PER_PAGE, allPlayers.size());
+        List<Player> pagePlayers = allPlayers.subList(start, end);
+
+        List<ActionButton> buttons = new ArrayList<>();
+
+        // دکمه‌های بازیکنان در این صفحه
+        for (Player target : pagePlayers) {
+            String actionKey = "gnrltpa:select_" + (here ? "here_" : "tpa_") + target.getUniqueId();
+            buttons.add(ActionButton.create(
+                    Component.text("✦ " + target.getName(), NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false),
+                    Component.text("World: " + target.getWorld().getName() + " | Health: " + (int) target.getHealth(), NamedTextColor.GRAY),
+                    100,
+                    DialogAction.customClick(Key.key(actionKey), null)
+            ));
+        }
+
+        // دکمه Previous (اگر صفحه قبل وجود دارد)
+        if (page > 1) {
+            String prevKey = "gnrltpa:page_" + (here ? "here_" : "tpa_") + (page - 1);
+            buttons.add(ActionButton.create(
+                    Component.text("◀ Previous", NamedTextColor.GREEN),
+                    Component.text("Go to page " + (page - 1), NamedTextColor.GRAY),
+                    100,
+                    DialogAction.customClick(Key.key(prevKey), null)
+            ));
+        }
+
+        // دکمه Next (اگر صفحه بعد وجود دارد)
+        if (page < totalPages) {
+            String nextKey = "gnrltpa:page_" + (here ? "here_" : "tpa_") + (page + 1);
+            buttons.add(ActionButton.create(
+                    Component.text("Next ▶", NamedTextColor.GREEN),
+                    Component.text("Go to page " + (page + 1), NamedTextColor.GRAY),
+                    100,
+                    DialogAction.customClick(Key.key(nextKey), null)
+            ));
+        }
+
+        Component title = Component.text(here ? "✦ TPAHere (Page " + page + "/" + totalPages + ") ✦" : "✦ TPA (Page " + page + "/" + totalPages + ") ✦",
                 here ? NamedTextColor.AQUA : NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false);
-
-        // بدنه دیالوگ شامل راهنما و لیست اسم بازیکن‌ها
-        DialogBody listBody = DialogBody.plainMessage(Component.text(
-                "بازیکنان آنلاین: " + names + "\n\n" +
-                "نام بازیکن را وارد کنید یا خالی بگذارید تا همه را ببینید:",
-                NamedTextColor.WHITE));
 
         Dialog dialog = Dialog.create(builder -> builder.empty()
                 .base(DialogBase.builder(title)
-                        .body(List.of(listBody))
-                        .inputs(List.of(
-                                DialogInput.text("search_query", Component.text("جستجو", NamedTextColor.YELLOW))
-                                        .width(200)
-                                        .build()
-                        ))
+                        .body(List.of(DialogBody.plainMessage(Component.text("Select a player:", NamedTextColor.WHITE))))
                         .canCloseWithEscape(true)
                         .build())
-                .type(DialogType.confirmation(
-                        ActionButton.create(
-                                Component.text("🔍 جستجو", NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true),
-                                Component.text("Search", NamedTextColor.GRAY),
-                                100,
-                                DialogAction.customClick(Key.key("gnrltpa:search_" + (here ? "here" : "tpa")), null)
-                        ),
-                        ActionButton.create(
-                                Component.text("✖ انصراف", NamedTextColor.RED).decoration(TextDecoration.BOLD, true),
-                                Component.text("Cancel", NamedTextColor.GRAY),
-                                100,
-                                null
-                        )
-                ))
+                .type(DialogType.multiAction(buttons, null, 1)) // 1 ستون برای خوانایی بهتر
         );
 
         player.showDialog(dialog);
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.2f);
     }
 
-    // مرحله ۲: نمایش نتایج فیلتر شده
-    private void showFilteredPlayers(Player player, boolean here, String filter) {
-        List<Player> onlinePlayers = new ArrayList<>();
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            if (!p.equals(player)) onlinePlayers.add(p);
-        }
-
-        List<Player> filtered = onlinePlayers;
-        if (filter != null && !filter.isEmpty()) {
-            String lowerFilter = filter.toLowerCase();
-            filtered = onlinePlayers.stream()
-                    .filter(p -> p.getName().toLowerCase().contains(lowerFilter))
-                    .collect(Collectors.toList());
-        }
-
-        if (filtered.isEmpty()) {
-            player.sendRichMessage("<yellow>بازیکنی با این نام پیدا نشد.</yellow>");
-            return;
-        }
-
-        List<ActionButton> buttons = new ArrayList<>();
-        int count = 0;
-        for (Player target : filtered) {
-            if (count >= 10) break;
-            count++;
-
-            String actionKey = "gnrltpa:select_" + (here ? "here_" : "tpa_") + target.getUniqueId();
-            ActionButton btn = ActionButton.create(
-                    Component.text("✦ " + target.getName(), NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false),
-                    Component.text("World: " + target.getWorld().getName() + " | Health: " + (int) target.getHealth(), NamedTextColor.GRAY),
-                    100,
-                    DialogAction.customClick(Key.key(actionKey), null)
-            );
-            buttons.add(btn);
-        }
-
-        Component title = Component.text(here ? "✦ TPAHere - نتایج ✦" : "✦ TPA - نتایج ✦",
-                here ? NamedTextColor.AQUA : NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false);
-
-        Dialog dialog = Dialog.create(builder -> builder.empty()
-                .base(DialogBase.builder(title)
-                        .body(List.of(DialogBody.plainMessage(Component.text("بازیکن مورد نظر را انتخاب کنید:", NamedTextColor.WHITE))))
-                        .canCloseWithEscape(true)
-                        .build())
-                .type(DialogType.multiAction(buttons, null, 1))
-        );
-
-        player.showDialog(dialog);
+    // اورلود برای وقتی که فقط می‌خواهیم صفحه اول باز شود
+    public void openMenu(Player player, boolean here) {
+        openMenu(player, here, 1);
     }
 
     @EventHandler
@@ -148,30 +115,22 @@ public class TpaMenu implements Listener {
         Player player = conn.getPlayer();
         String key = event.getIdentifier().asString();
 
-        // پردازش جستجو
-        if (key.startsWith("gnrltpa:search_")) {
-            boolean isHere = key.endsWith("_here");
+        // پردازش دکمه‌های صفحه‌بندی
+        if (key.startsWith("gnrltpa:page_")) {
             player.closeDialog();
-
-            DialogResponseView view = event.getDialogResponseView();
-            String query = "";
-            if (view != null) {
-                String text = view.getText("search_query");
-                if (text != null) query = text;
-            }
-
-            showFilteredPlayers(player, isHere, query);
+            String rest = key.substring("gnrltpa:page_".length());
+            boolean isHere = rest.startsWith("here_");
+            int page = Integer.parseInt(rest.substring(isHere ? "here_".length() : "tpa_".length()));
+            openMenu(player, isHere, page);
             return;
         }
 
-        // پردازش انتخاب بازیکن
+        // پردازش انتخاب بازیکن (همان کد قبلی)
         if (key.startsWith("gnrltpa:select_")) {
             player.closeDialog();
-
             String rest = key.substring("gnrltpa:select_".length());
             boolean isHere;
             String uuidStr;
-
             if (rest.startsWith("here_")) {
                 isHere = true;
                 uuidStr = rest.substring("here_".length());
@@ -181,7 +140,6 @@ public class TpaMenu implements Listener {
             } else {
                 return;
             }
-
             try {
                 UUID targetId = UUID.fromString(uuidStr);
                 Player target = Bukkit.getPlayer(targetId);
