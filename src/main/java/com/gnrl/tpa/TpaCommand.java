@@ -10,10 +10,12 @@ public class TpaCommand implements CommandExecutor {
 
     private final GNRLTPA plugin;
     private final TpaManager manager;
+    private final TpaMenu menu;
 
-    public TpaCommand(GNRLTPA plugin, TpaManager manager) {
+    public TpaCommand(GNRLTPA plugin, TpaManager manager, TpaMenu menu) {
         this.plugin = plugin;
         this.manager = manager;
+        this.menu = menu;
     }
 
     @Override
@@ -28,8 +30,7 @@ public class TpaCommand implements CommandExecutor {
             return true;
         }
 
-        // ساخت TpaMenu و باز کردن دیالوگ جستجو
-        TpaMenu menu = new TpaMenu(plugin, manager);
+        // استفاده از نمونه‌ی موجود TpaMenu — نه ساخت نمونه جدید
         menu.openMenu(player, false);
 
         return true;
