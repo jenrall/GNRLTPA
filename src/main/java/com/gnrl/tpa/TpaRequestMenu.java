@@ -27,7 +27,7 @@ public class TpaRequestMenu implements Listener {
     public TpaRequestMenu(GNRLTPA plugin, TpaManager manager) {
         this.plugin = plugin;
         this.manager = manager;
-        // ثبت لیسنر برای دیالوگ
+        // ثبت خودکار لیسنر برای دیالوگ
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
