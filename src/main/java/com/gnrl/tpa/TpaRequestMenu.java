@@ -1,20 +1,25 @@
 package com.gnrl.tpa;
 
-import dev.triumphteam.gui.builder.item.ItemBuilder;
-import dev.triumphteam.gui.guis.Gui;
+import io.papermc.paper.connection.PlayerGameConnection;
+import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.event.player.PlayerCustomClickEvent;
+import io.papermc.paper.registry.data.dialog.ActionButton;
+import io.papermc.paper.registry.data.dialog.DialogBase;
+import io.papermc.paper.registry.data.dialog.action.DialogAction;
+import io.papermc.paper.registry.data.dialog.type.DialogType;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TpaRequestMenu {
+public class TpaRequestMenu implements Listener {
 
     private final GNRLTPA plugin;
     private final TpaManager manager;
@@ -22,66 +27,65 @@ public class TpaRequestMenu {
     public TpaRequestMenu(GNRLTPA plugin, TpaManager manager) {
         this.plugin = plugin;
         this.manager = manager;
+        // ثبت لیسنر برای دیالوگ
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     public void openRequestMenu(Player receiver, Player sender, boolean here) {
-        // ساخت منو
-        Gui gui = Gui.gui()
-                .title(Component.text(here ? "✦ TPAHere Request ✦" : "✦ TPA Request ✦", here ? NamedTextColor.AQUA : NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false))
-                .rows(3)
-                .disableAllInteractions()
-                .create();
+        Component title = Component.text(here ? "✦ TPAHere Request ✦" : "✦ TPA Request ✦", 
+                here ? NamedTextColor.AQUA : NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false);
 
-        // 1. پر کردن پس‌زمینه با شیشه خاکستری
-        gui.getFiller().fill(ItemBuilder.from(Material.GRAY_STAINED_GLASS_PANE)
-                .name(Component.text(" "))
-                .asGuiItem());
+        // ساخت بدنه‌ی دیالوگ (اطلاعات فرستنده)
+        List<DialogBase.DialogBody> body = new ArrayList<>();
+        body.add(DialogBase.DialogBody.plainMessage(Component.text(
+                "Player: " + sender.getName() + "\n" +
+                "World: " + sender.getWorld().getName() + "\n" +
+                "Health: " + (int) sender.getHealth() + "/20",
+                NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false)));
 
-        // 2. آماده‌سازی سر بازیکن (بدون ارور)
-        ItemStack headItem = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta headMeta = (SkullMeta) headItem.getItemMeta();
-        
-        if (headMeta != null) {
-            headMeta.setOwningPlayer(sender);
-            headMeta.displayName(Component.text("✦ " + sender.getName() + " ✦", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
-            
-            List<Component> lore = new ArrayList<>();
-            lore.add(Component.empty());
-            lore.add(Component.text("⚡ Status: ", NamedTextColor.GRAY).append(Component.text("Online", NamedTextColor.GREEN)).decoration(TextDecoration.ITALIC, false));
-            lore.add(Component.text("❤ Health: ", NamedTextColor.GRAY).append(Component.text((int) sender.getHealth() + "/20", NamedTextColor.RED)).decoration(TextDecoration.ITALIC, false));
-            lore.add(Component.text("📍 World: ", NamedTextColor.GRAY).append(Component.text(sender.getWorld().getName(), NamedTextColor.AQUA)).decoration(TextDecoration.ITALIC, false));
-            lore.add(Component.empty());
-            lore.add(Component.text(here ? "Wants you to teleport to them" : "Wants to teleport to you", NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false));
-            
-            headMeta.lore(lore);
-            headItem.setItemMeta(headMeta);
-        }
+        // دکمه Accept
+        ActionButton acceptBtn = ActionButton.create(
+                Component.text("✔ ACCEPT", NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true),
+                Component.text("Click to accept this request", NamedTextColor.GRAY),
+                100,
+                DialogAction.customClick(Key.key("gnrltpa:accept_" + sender.getUniqueId()), null)
+        );
 
-        // قرار دادن سر در مرکز منو (اسلات 13)
-        gui.setItem(13, ItemBuilder.from(headItem).asGuiItem());
+        // دکمه Deny
+        ActionButton denyBtn = ActionButton.create(
+                Component.text("✖ DENY", NamedTextColor.RED).decoration(TextDecoration.BOLD, true),
+                Component.text("Click to deny this request", NamedTextColor.GRAY),
+                100,
+                DialogAction.customClick(Key.key("gnrltpa:deny_" + sender.getUniqueId()), null)
+        );
 
-        // 3. دکمه Accept (اسلات 11)
-        gui.setItem(11, ItemBuilder.from(Material.LIME_STAINED_GLASS_PANE)
-                .name(Component.text("✔ ACCEPT", NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false))
-                .lore(Component.text("Click to accept this request", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))
-                .asGuiItem(event -> {
-                    event.setCancelled(true);
-                    receiver.closeInventory();
-                    manager.confirmRequest(receiver); // تایید نهایی
-                }));
+        // ساخت دیالوگ از نوع multiAction با ۲ ستون (دقیقاً شبیه عکس)
+        Dialog dialog = Dialog.create(builder -> builder.empty()
+                .base(DialogBase.builder(title)
+                        .body(body)
+                        .canCloseWithEscape(true)
+                        .build())
+                .type(DialogType.multiAction(List.of(acceptBtn, denyBtn), null, 2))
+        );
 
-        // 4. دکمه Deny (اسلات 15)
-        gui.setItem(15, ItemBuilder.from(Material.RED_STAINED_GLASS_PANE)
-                .name(Component.text("✖ DENY", NamedTextColor.RED).decoration(TextDecoration.BOLD, true).decoration(TextDecoration.ITALIC, false))
-                .lore(Component.text("Click to deny this request", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))
-                .asGuiItem(event -> {
-                    event.setCancelled(true);
-                    receiver.closeInventory();
-                    manager.denyRequest(receiver); // رد درخواست
-                }));
-
-        // افکت صدا و باز کردن منو
+        // نمایش به بازیکن گیرنده
+        receiver.showDialog(dialog);
         receiver.playSound(receiver.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.2f);
-        gui.open(receiver);
+    }
+
+    // هندل کردن کلیک روی دکمه‌های دیالوگ
+    @EventHandler
+    public void onDialogClick(PlayerCustomClickEvent event) {
+        if (!(event.getCommonConnection() instanceof PlayerGameConnection conn)) return;
+        Player player = conn.getPlayer();
+        String key = event.getIdentifier().asString();
+
+        if (key.startsWith("gnrltpa:accept_")) {
+            player.closeDialog();
+            manager.confirmRequest(player);
+        } else if (key.startsWith("gnrltpa:deny_")) {
+            player.closeDialog();
+            manager.denyRequest(player);
+        }
     }
 }
