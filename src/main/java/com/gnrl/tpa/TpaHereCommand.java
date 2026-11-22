@@ -1,9 +1,5 @@
 package com.gnrl.tpa;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,76 +10,27 @@ public class TpaHereCommand implements CommandExecutor {
 
     private final GNRLTPA plugin;
     private final TpaManager manager;
+    private final TpaMenu menu;
 
-    public TpaHereCommand(GNRLTPA plugin, TpaManager manager) {
+    public TpaHereCommand(GNRLTPA plugin, TpaManager manager, TpaMenu menu) {
         this.plugin = plugin;
         this.manager = manager;
+        this.menu = menu;
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
-                             @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player player)) return true;
-
-        if (!player.hasPermission("gnrltpa.use")) {
-            player.sendRichMessage(plugin.getConfig().getString("messages.no-permission", ""));
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("این دستور فقط برای بازیکنان قابل استفاده است.");
             return true;
         }
 
-        if (args.length == 0) {
-            plugin.getTpaMenu().openMenu(player, true);
+        if (plugin.getServer().getOnlinePlayers().size() <= 1) {
+            player.sendRichMessage("<yellow>هیچ بازیکن دیگری برای ارسال درخواست آنلاین نیست.</yellow>");
             return true;
         }
 
-        Player target = Bukkit.getPlayer(args[0]);
-        if (target == null) {
-            player.sendRichMessage(plugin.getConfig().getString("messages.player-not-found", ""));
-            return true;
-        }
-
-        if (target.equals(player)) {
-            player.sendRichMessage(plugin.getConfig().getString("messages.self-request", ""));
-            return true;
-        }
-
-        if (plugin.getPlayerSettings().isTpaDisabled(target.getUniqueId())) {
-            player.sendRichMessage(plugin.getConfig().getString("messages.tpa-disabled", ""));
-            return true;
-        }
-
-        if (plugin.getPlayerSettings().isBlocked(target.getUniqueId(), player.getUniqueId())) {
-            player.sendRichMessage(plugin.getConfig().getString("messages.you-are-blocked", ""));
-            return true;
-        }
-
-        if (manager.isOnCooldown(player)) {
-            player.sendRichMessage(plugin.getConfig().getString("messages.cooldown", ""));
-            return true;
-        }
-
-        if (manager.hasPendingRequest(target)) {
-            player.sendRichMessage(plugin.getConfig().getString("messages.already-pending", ""));
-            return true;
-        }
-
-        manager.sendRequest(player, target, true);
-        manager.setCooldown(player);
-
-        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.5f);
-
-        player.sendMessage(Component.text(""));
-        player.sendMessage(Component.text("  ╭──────────────────────────╮", NamedTextColor.GOLD));
-        player.sendMessage(Component.text("  │  ", NamedTextColor.GOLD)
-                .append(Component.text("✦ TPAHere Sent ✦", NamedTextColor.AQUA))
-                .append(Component.text("      │", NamedTextColor.GOLD)));
-        player.sendMessage(Component.text("  │  ", NamedTextColor.GOLD)
-                .append(Component.text("to: ", NamedTextColor.GRAY))
-                .append(Component.text(target.getName(), NamedTextColor.YELLOW))
-                .append(Component.text("              │", NamedTextColor.GOLD)));
-        player.sendMessage(Component.text("  ╰──────────────────────────╯", NamedTextColor.GOLD));
-        player.sendMessage(Component.text(""));
-
-        TpaHelper.sendRequestToTarget(plugin, player, target, true);
+        menu.openMenu(player, true); // here = true
 
         return true;
     }
