@@ -11,15 +11,15 @@ public class GNRLTPA extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        
+
         // راه‌اندازی منیجرها
         this.tpaManager = new TpaManager(this);
-        this.playerSettings = new PlayerSettings(); // اگر ورودی داره، اینجا اضافه کن
-        this.tpaMenu = new TpaMenu(this, tpaManager);
+        this.playerSettings = new PlayerSettings();
+        this.tpaMenu = new TpaMenu(this, tpaManager); // فقط یک بار ساخته می‌شود
 
-        // ثبت کامندها
-        getCommand("tpa").setExecutor(new TpaCommand(this, tpaManager));
-        getCommand("tpahere").setExecutor(new TpaHereCommand(this, tpaManager));
+        // ثبت کامندها — TpaMenu رو پاس می‌دیم تا دوباره ساخته نشه
+        getCommand("tpa").setExecutor(new TpaCommand(this, tpaManager, tpaMenu));
+        getCommand("tpahere").setExecutor(new TpaHereCommand(this, tpaManager, tpaMenu));
         getCommand("tpaccept").setExecutor(new TpaAcceptCommand(this, tpaManager));
         getCommand("tpdeny").setExecutor(new TpaDenyCommand(this, tpaManager));
         getCommand("tpacancel").setExecutor(new TpaCancelCommand(this, tpaManager));
@@ -28,16 +28,11 @@ public class GNRLTPA extends JavaPlugin {
         getCommand("tpblock").setExecutor(new TpaBlockCommand(this));
         getCommand("tpreload").setExecutor(new TpaReloadCommand(this));
 
-        // ثبت تب‌کامپلتر (فعلاً غیرفعال تا از ارور جلوگیری شود)
-        // TpaTabCompleter tabCompleter = new TpaTabCompleter();
-        // getCommand("tpa").setTabCompleter(tabCompleter);
-        // getCommand("tpahere").setTabCompleter(tabCompleter);
-        // getCommand("tpauto").setTabCompleter(tabCompleter);
-
         // ثبت ایونت‌ها
         getServer().getPluginManager().registerEvents(new TpaMenuListener(this), this);
         getServer().getPluginManager().registerEvents(new TpaMoveListener(tpaManager), this);
         getServer().getPluginManager().registerEvents(new TpaDialogListener(this), this);
+        // توجه: TpaMenu خودش توی سازنده registerEvents می‌کنه، پس اینجا دوباره ثبتش نکن
 
         printLogo();
     }
