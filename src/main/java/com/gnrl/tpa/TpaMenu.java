@@ -1,22 +1,28 @@
 package com.gnrl.tpa;
 
-import dev.triumphteam.gui.builder.item.ItemBuilder;
-import dev.triumphteam.gui.guis.Gui;
-import dev.triumphteam.gui.guis.GuiItem;
-import dev.triumphteam.gui.guis.PaginatedGui;
+import io.papermc.paper.connection.PlayerGameConnection;
+import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.event.player.PlayerCustomClickEvent;
+import io.papermc.paper.registry.data.dialog.ActionButton;
+import io.papermc.paper.registry.data.dialog.DialogBase;
+import io.papermc.paper.registry.data.dialog.action.DialogAction;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
+import io.papermc.paper.registry.data.dialog.type.DialogType;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-public class TpaMenu {
+public class TpaMenu implements Listener {
 
     private final GNRLTPA plugin;
     private final TpaManager manager;
@@ -24,6 +30,8 @@ public class TpaMenu {
     public TpaMenu(GNRLTPA plugin, TpaManager manager) {
         this.plugin = plugin;
         this.manager = manager;
+        // ثبت لیسنر برای هندل کردن کلیک‌های دیالوگ
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     public void openMenu(Player player, boolean here) {
@@ -33,82 +41,80 @@ public class TpaMenu {
         }
 
         if (onlinePlayers.isEmpty()) {
-            player.sendRichMessage("<yellow>No players online.</yellow>");
+            player.sendRichMessage("<yellow>هیچ بازیکن دیگری آنلاین نیست.</yellow>");
             return;
         }
 
-        PaginatedGui gui = Gui.paginated()
-                .title(Component.text(here ? "✦ TPAHere Menu ✦" : "✦ TPA Menu ✦", here ? NamedTextColor.AQUA : NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false))
-                .rows(6)
-                .pageSize(21)
-                .disableAllInteractions()
-                .create();
-
-        gui.getFiller().fill(ItemBuilder.from(Material.GRAY_STAINED_GLASS_PANE)
-                .name(Component.text(" "))
-                .asGuiItem());
-
-        // لوگو بالای منو
-        gui.setItem(4, ItemBuilder.from(here ? Material.ENDER_PEARL : Material.NETHER_STAR)
-                .name(Component.text(here ? "✦ TPAHere ✦" : "✦ GNRLFlawless TPA ✦", here ? NamedTextColor.AQUA : NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false))
-                .lore(
-                        Component.empty(),
-                        Component.text(here ? "Request players to come to you" : "Request to teleport to a player", NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
-                        Component.empty(),
-                        Component.text("Plugin by ", NamedTextColor.GRAY).append(Component.text("GNRLFlawless", NamedTextColor.YELLOW)).decoration(TextDecoration.ITALIC, false)
-                )
-                .asGuiItem());
-
-        // دکمه‌های پایین
-        gui.setItem(6, 5, ItemBuilder.from(Material.BARRIER)
-                .name(Component.text("✖ Close", NamedTextColor.RED).decoration(TextDecoration.ITALIC, false))
-                .asGuiItem(event -> event.getWhoClicked().closeInventory()));
-
-        gui.setItem(6, 1, ItemBuilder.from(Material.ARROW)
-                .name(Component.text("◀ Previous Page", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false))
-                .asGuiItem(event -> gui.previous()));
-
-        gui.setItem(6, 9, ItemBuilder.from(Material.ARROW)
-                .name(Component.text("Next Page ▶", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false))
-                .asGuiItem(event -> gui.next()));
-
-        gui.setItem(6, 4, ItemBuilder.from(Material.PAPER)
-                .name(Component.text("⟳ Refresh", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false))
-                .asGuiItem(event -> {
-                    player.closeInventory();
-                    openMenu(player, here);
-                }));
-
-        // اضافه کردن بازیکنان به لیست
+        // ساخت دکمه برای هر بازیکن (حداکثر ۱۴ دکمه برای جلوگیری از شلوغی بیش از حد)
+        List<ActionButton> buttons = new ArrayList<>();
+        int count = 0;
         for (Player target : onlinePlayers) {
-            GuiItem head = ItemBuilder.from(Material.PLAYER_HEAD)
-                    .name(Component.text("✦ " + target.getName() + " ✦", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false))
-                    .lore(
-                            Component.empty(),
-                            Component.text("  ⚡ Status: ", NamedTextColor.GRAY).append(Component.text("Online", NamedTextColor.GREEN)).decoration(TextDecoration.ITALIC, false),
-                            Component.text("  ❤ Health: ", NamedTextColor.GRAY).append(Component.text((int) target.getHealth() + "/20", NamedTextColor.RED)).decoration(TextDecoration.ITALIC, false),
-                            Component.text("  📍 World: ", NamedTextColor.GRAY).append(Component.text(target.getWorld().getName(), NamedTextColor.AQUA)).decoration(TextDecoration.ITALIC, false),
-                            Component.empty(),
-                            Component.text(here ? "  ▸ Click to request here" : "  ▸ Click to send TPA", NamedTextColor.GREEN).decoration(TextDecoration.ITALIC, false)
-                    )
-                    .asGuiItem(event -> {
-                        event.setCancelled(true);
-                        player.closeInventory();
-                        if (here) {
-                            manager.sendRequest(player, target, true);
-                        } else {
-                            manager.sendRequest(player, target, false);
-                        }
-                    });
+            if (count >= 14) break; // محدودیت تعداد دکمه‌ها
+            count++;
 
-            if (head.getItemStack().getItemMeta() instanceof SkullMeta meta) {
-                meta.setOwningPlayer(target);
-                head.getItemStack().setItemMeta(meta);
-            }
-            gui.addItem(head);
+            // کلید یکتا شامل حالت (here) و UUID بازیکن هدف
+            String actionKey = "gnrltpa:select_" + (here ? "here_" : "tpa_") + target.getUniqueId();
+
+            ActionButton btn = ActionButton.create(
+                    Component.text("✦ " + target.getName(), NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false),
+                    Component.text("World: " + target.getWorld().getName() + " | Health: " + (int) target.getHealth(), NamedTextColor.GRAY),
+                    100,
+                    DialogAction.customClick(Key.key(actionKey), null)
+            );
+            buttons.add(btn);
         }
 
-        player.playSound(player.getLocation(), Sound.BLOCK_CHEST_OPEN, 1f, 1.2f);
-        gui.open(player);
+        Component title = Component.text(here ? "✦ TPAHere - انتخاب بازیکن ✦" : "✦ TPA - انتخاب بازیکن ✦",
+                here ? NamedTextColor.AQUA : NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false);
+
+        Dialog dialog = Dialog.create(builder -> builder.empty()
+                .base(DialogBase.builder(title)
+                        .body(List.of(DialogBody.plainMessage(Component.text("یک بازیکن را برای ارسال درخواست انتخاب کنید:", NamedTextColor.WHITE))))
+                        .canCloseWithEscape(true)
+                        .build())
+                .type(DialogType.multiAction(buttons, null, 2)) // ۲ ستون
+        );
+
+        player.showDialog(dialog);
+        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.2f);
+    }
+
+    // هندل کردن کلیک روی دکمه‌های دیالوگ
+    @EventHandler
+    public void onDialogClick(PlayerCustomClickEvent event) {
+        if (!(event.getCommonConnection() instanceof PlayerGameConnection conn)) return;
+        Player player = conn.getPlayer();
+        String key = event.getIdentifier().asString();
+
+        if (key.startsWith("gnrltpa:select_")) {
+            player.closeDialog();
+
+            // استخراج UUID و حالت از کلید
+            String rest = key.substring("gnrltpa:select_".length());
+            boolean isHere;
+            String uuidStr;
+
+            if (rest.startsWith("here_")) {
+                isHere = true;
+                uuidStr = rest.substring("here_".length());
+            } else if (rest.startsWith("tpa_")) {
+                isHere = false;
+                uuidStr = rest.substring("tpa_".length());
+            } else {
+                return;
+            }
+
+            try {
+                UUID targetId = UUID.fromString(uuidStr);
+                Player target = Bukkit.getPlayer(targetId);
+                if (target != null && target.isOnline()) {
+                    manager.sendRequest(player, target, isHere);
+                } else {
+                    player.sendRichMessage("<red>بازیکن مورد نظر دیگر آنلاین نیست.</red>");
+                }
+            } catch (IllegalArgumentException e) {
+                // UUID نامعتبر
+            }
+        }
     }
 }
