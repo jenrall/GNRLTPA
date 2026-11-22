@@ -36,7 +36,7 @@ public class TpaMenu implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    // مرحله ۱: نمایش دیالوگ جستجو
+    // مرحله ۱: نمایش دیالوگ جستجو به همراه لیست اسم بازیکن‌ها
     public void openMenu(Player player, boolean here) {
         List<Player> onlinePlayers = new ArrayList<>();
         for (Player p : Bukkit.getOnlinePlayers()) {
@@ -48,15 +48,23 @@ public class TpaMenu implements Listener {
             return;
         }
 
-        Component title = Component.text(here ? "✦ TPAHere - جستجوی بازیکن ✦" : "✦ TPA - جستجوی بازیکن ✦",
+        // ساخت متن لیست بازیکن‌ها برای نمایش در بدنه دیالوگ
+        String names = onlinePlayers.stream()
+                .map(Player::getName)
+                .collect(Collectors.joining("، "));
+
+        Component title = Component.text(here ? "✦ TPAHere - جستجو ✦" : "✦ TPA - جستجو ✦",
                 here ? NamedTextColor.AQUA : NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false);
 
-        // ساخت دیالوگ با فیلد ورودی متنی
+        // بدنه دیالوگ شامل راهنما و لیست اسم بازیکن‌ها
+        DialogBody listBody = DialogBody.plainMessage(Component.text(
+                "بازیکنان آنلاین: " + names + "\n\n" +
+                "نام بازیکن را وارد کنید یا خالی بگذارید تا همه را ببینید:",
+                NamedTextColor.WHITE));
+
         Dialog dialog = Dialog.create(builder -> builder.empty()
                 .base(DialogBase.builder(title)
-                        .body(List.of(DialogBody.plainMessage(Component.text(
-                                "نام بازیکن را وارد کنید یا خالی بگذارید تا همه را ببینید:",
-                                NamedTextColor.WHITE))))
+                        .body(List.of(listBody))
                         .inputs(List.of(
                                 DialogInput.text("search_query", Component.text("جستجو", NamedTextColor.YELLOW))
                                         .width(200)
@@ -67,7 +75,7 @@ public class TpaMenu implements Listener {
                 .type(DialogType.confirmation(
                         ActionButton.create(
                                 Component.text("🔍 جستجو", NamedTextColor.GREEN).decoration(TextDecoration.BOLD, true),
-                                Component.text("Search for players", NamedTextColor.GRAY),
+                                Component.text("Search", NamedTextColor.GRAY),
                                 100,
                                 DialogAction.customClick(Key.key("gnrltpa:search_" + (here ? "here" : "tpa")), null)
                         ),
@@ -75,7 +83,7 @@ public class TpaMenu implements Listener {
                                 Component.text("✖ انصراف", NamedTextColor.RED).decoration(TextDecoration.BOLD, true),
                                 Component.text("Cancel", NamedTextColor.GRAY),
                                 100,
-                                null // بستن دیالوگ
+                                null
                         )
                 ))
         );
@@ -84,14 +92,13 @@ public class TpaMenu implements Listener {
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.2f);
     }
 
-    // مرحله ۲: پس از جستجو، نمایش لیست فیلتر شده بازیکنان
+    // مرحله ۲: نمایش نتایج فیلتر شده
     private void showFilteredPlayers(Player player, boolean here, String filter) {
         List<Player> onlinePlayers = new ArrayList<>();
         for (Player p : Bukkit.getOnlinePlayers()) {
             if (!p.equals(player)) onlinePlayers.add(p);
         }
 
-        // فیلتر بر اساس نام (اگر filter خالی نباشد)
         List<Player> filtered = onlinePlayers;
         if (filter != null && !filter.isEmpty()) {
             String lowerFilter = filter.toLowerCase();
@@ -105,7 +112,6 @@ public class TpaMenu implements Listener {
             return;
         }
 
-        // ساخت دکمه برای هر بازیکن (حداکثر ۱۰ تا)
         List<ActionButton> buttons = new ArrayList<>();
         int count = 0;
         for (Player target : filtered) {
@@ -127,8 +133,7 @@ public class TpaMenu implements Listener {
 
         Dialog dialog = Dialog.create(builder -> builder.empty()
                 .base(DialogBase.builder(title)
-                        .body(List.of(DialogBody.plainMessage(Component.text(
-                                "بازیکن مورد نظر را انتخاب کنید:", NamedTextColor.WHITE))))
+                        .body(List.of(DialogBody.plainMessage(Component.text("بازیکن مورد نظر را انتخاب کنید:", NamedTextColor.WHITE))))
                         .canCloseWithEscape(true)
                         .build())
                 .type(DialogType.multiAction(buttons, null, 1))
@@ -143,12 +148,11 @@ public class TpaMenu implements Listener {
         Player player = conn.getPlayer();
         String key = event.getIdentifier().asString();
 
-        // پردازش دکمه جستجو
+        // پردازش جستجو
         if (key.startsWith("gnrltpa:search_")) {
             boolean isHere = key.endsWith("_here");
             player.closeDialog();
 
-            // دریافت متن وارد شده از فیلد جستجو
             DialogResponseView view = event.getDialogResponseView();
             String query = "";
             if (view != null) {
