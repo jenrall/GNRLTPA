@@ -1,7 +1,5 @@
 package com.gnrl.tpa;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -19,55 +17,24 @@ public class TpaCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command,
-                             @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player player)) return true;
-
-        if (!player.hasPermission("gnrltpa.use")) {
-            player.sendRichMessage(plugin.getConfig().getString("messages.no-permission", ""));
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+        // 1. بررسی اینکه فرستنده یک بازیکن است
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("این دستور فقط برای بازیکنان قابل استفاده است.");
             return true;
         }
 
-        if (args.length == 0) {
-            plugin.getTpaMenu().openMenu(player, false);
+        // 2. بررسی اینکه بازیکن به تعداد کافی آنلاین وجود دارد
+        // (این بررسی در متد openMenu هم انجام می‌شود، اما برای پیام‌دهی بهتر است اینجا هم چک شود)
+        if (plugin.getServer().getOnlinePlayers().size() <= 1) {
+            player.sendRichMessage("<yellow>هیچ بازیکن دیگری برای ارسال درخواست آنلاین نیست.</yellow>");
             return true;
         }
 
-        Player target = Bukkit.getPlayer(args[0]);
-        if (target == null) {
-            player.sendRichMessage(plugin.getConfig().getString("messages.player-not-found", ""));
-            return true;
-        }
-
-        if (target.equals(player)) {
-            player.sendRichMessage(plugin.getConfig().getString("messages.self-request", ""));
-            return true;
-        }
-
-        if (plugin.getPlayerSettings().isTpaDisabled(target.getUniqueId())) {
-            player.sendRichMessage(plugin.getConfig().getString("messages.tpa-disabled", ""));
-            return true;
-        }
-
-        if (plugin.getPlayerSettings().isBlocked(target.getUniqueId(), player.getUniqueId())) {
-            player.sendRichMessage(plugin.getConfig().getString("messages.you-are-blocked", ""));
-            return true;
-        }
-
-        if (manager.isOnCooldown(player)) {
-            player.sendRichMessage(plugin.getConfig().getString("messages.cooldown", ""));
-            return true;
-        }
-
-        if (manager.hasPendingRequest(target)) {
-            player.sendRichMessage(plugin.getConfig().getString("messages.already-pending", ""));
-            return true;
-        }
-
-        manager.sendRequest(player, target, false);
-        manager.setCooldown(player);
-
-        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.5f);
+        // 3. ساخت نمونه‌ای از TpaMenu و باز کردن منو
+        // از آنجایی که در TpaMenu از Dialog استفاده می‌کنیم، پارامتر here را false می‌فرستیم (برای /tpa)
+        TpaMenu menu = new TpaMenu(plugin, manager);
+        menu.openMenu(player, false);
 
         return true;
     }
