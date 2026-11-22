@@ -30,7 +30,6 @@ public class TpaMenu implements Listener {
     public TpaMenu(GNRLTPA plugin, TpaManager manager) {
         this.plugin = plugin;
         this.manager = manager;
-        // ثبت لیسنر برای هندل کردن کلیک‌های دیالوگ
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -45,23 +44,35 @@ public class TpaMenu implements Listener {
             return;
         }
 
-        // ساخت دکمه برای هر بازیکن (حداکثر ۱۴ دکمه برای جلوگیری از شلوغی بیش از حد)
+        // ساخت لیست دکمه‌ها با فاصله‌گذاری بین بازیکنان
         List<ActionButton> buttons = new ArrayList<>();
         int count = 0;
+
         for (Player target : onlinePlayers) {
-            if (count >= 14) break; // محدودیت تعداد دکمه‌ها
+            if (count >= 10) break; // محدودیت تعداد بازیکنان برای جلوگیری از شلوغی
             count++;
 
-            // کلید یکتا شامل حالت (here) و UUID بازیکن هدف
+            // دکمه اصلی بازیکن
             String actionKey = "gnrltpa:select_" + (here ? "here_" : "tpa_") + target.getUniqueId();
-
-            ActionButton btn = ActionButton.create(
+            ActionButton playerBtn = ActionButton.create(
                     Component.text("✦ " + target.getName(), NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false),
                     Component.text("World: " + target.getWorld().getName() + " | Health: " + (int) target.getHealth(), NamedTextColor.GRAY),
                     100,
                     DialogAction.customClick(Key.key(actionKey), null)
             );
-            buttons.add(btn);
+            buttons.add(playerBtn);
+
+            // اضافه کردن یک دکمه خالی (Spacer) بین دکمه‌ها برای ایجاد فاصله
+            // فقط اگر آخرین دکمه نباشد
+            if (count < onlinePlayers.size() && count < 10) {
+                ActionButton spacer = ActionButton.create(
+                        Component.text(" "), // متن خالی
+                        Component.empty(),
+                        1,
+                        null // بدون اکشن
+                );
+                buttons.add(spacer);
+            }
         }
 
         Component title = Component.text(here ? "✦ TPAHere - انتخاب بازیکن ✦" : "✦ TPA - انتخاب بازیکن ✦",
@@ -72,14 +83,14 @@ public class TpaMenu implements Listener {
                         .body(List.of(DialogBody.plainMessage(Component.text("یک بازیکن را برای ارسال درخواست انتخاب کنید:", NamedTextColor.WHITE))))
                         .canCloseWithEscape(true)
                         .build())
-                .type(DialogType.multiAction(buttons, null, 2)) // ۲ ستون
+                // استفاده از ۱ ستون برای نمایش هر دکمه در یک خط جداگانه (فاصله بیشتر)
+                .type(DialogType.multiAction(buttons, null, 1))
         );
 
         player.showDialog(dialog);
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1f, 1.2f);
     }
 
-    // هندل کردن کلیک روی دکمه‌های دیالوگ
     @EventHandler
     public void onDialogClick(PlayerCustomClickEvent event) {
         if (!(event.getCommonConnection() instanceof PlayerGameConnection conn)) return;
@@ -89,7 +100,6 @@ public class TpaMenu implements Listener {
         if (key.startsWith("gnrltpa:select_")) {
             player.closeDialog();
 
-            // استخراج UUID و حالت از کلید
             String rest = key.substring("gnrltpa:select_".length());
             boolean isHere;
             String uuidStr;
